@@ -1,0 +1,607 @@
+// Siou · سيو — نسخة الموبايل الأولى
+// صفحة واحدة: كل شاشة دالة بترجّع HTML، والأزرار بتشتغل بـ data-act.
+// البيانات (النجوم والنتايج) متخزّنة على الموبايل بس، مفيش حسابات ولا سيرفر.
+(function () {
+'use strict';
+var E = window.SiouEngine;
+var PARTS = {"lamp": "<circle cx=\"60\" cy=\"60\" r=\"56\" fill=\"#1f3a75\" stroke=\"#2b1d14\" stroke-width=\"3\"/><circle cx=\"60\" cy=\"38\" r=\"25\" fill=\"#d4952a\" stroke=\"#2b1d14\" stroke-width=\"2.4\"/><g stroke=\"#fffaf0\" stroke-width=\"1.7\" stroke-linecap=\"round\"><path d=\"M75.50 38.00 L82.50 38.00\"/><path d=\"M44.50 38.00 L37.50 38.00\"/><path d=\"M45.68 32.07 L39.21 29.39\"/><path d=\"M49.04 27.04 L44.09 22.09\"/><path d=\"M54.07 23.68 L51.39 17.21\"/><path d=\"M60.00 22.50 L60.00 15.50\"/><path d=\"M65.93 23.68 L68.61 17.21\"/><path d=\"M70.96 27.04 L75.91 22.09\"/><path d=\"M74.32 32.07 L80.79 29.39\"/></g><path d=\"M47 82 L54 63 Q60 58 66 63 L73 82Z\" fill=\"#a65a36\" stroke=\"#2b1d14\" stroke-width=\"2.4\" stroke-linejoin=\"round\"/><circle cx=\"60\" cy=\"90\" r=\"19\" fill=\"#a65a36\" stroke=\"#2b1d14\" stroke-width=\"2.6\"/><circle cx=\"60\" cy=\"90\" r=\"11.5\" fill=\"#e0a77f\" stroke=\"#2b1d14\" stroke-width=\"2\"/><path d=\"M58.0 83.4 L62.0 83.4 L62.0 88.0 L66.6 88.0 L66.6 92.0 L62.0 92.0 L62.0 96.6 L58.0 96.6 L58.0 92.0 L53.4 92.0 L53.4 88.0 L58.0 88.0Z\" fill=\"#a65a36\"/><circle cx=\"60.0\" cy=\"82.5\" r=\"1.09\" fill=\"#a65a36\"/><circle cx=\"62.3\" cy=\"83.4\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"57.7\" cy=\"83.4\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"60.0\" cy=\"97.5\" r=\"1.09\" fill=\"#a65a36\"/><circle cx=\"57.7\" cy=\"96.6\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"62.3\" cy=\"96.6\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"52.5\" cy=\"90.0\" r=\"1.09\" fill=\"#a65a36\"/><circle cx=\"53.4\" cy=\"87.7\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"53.4\" cy=\"92.3\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"67.5\" cy=\"90.0\" r=\"1.09\" fill=\"#a65a36\"/><circle cx=\"66.6\" cy=\"92.3\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"66.6\" cy=\"87.7\" r=\"0.99\" fill=\"#a65a36\"/><circle cx=\"60\" cy=\"66\" r=\"2\" fill=\"#2b1d14\"/><path d=\"M60 62 C49 54 49 40 60 22 C71 40 71 54 60 62Z\" fill=\"#b23a22\" stroke=\"#2b1d14\" stroke-width=\"2.4\" stroke-linejoin=\"round\"/><path d=\"M58.7 34 h2.6 v8 h6 v2.6 h-6 v12 h-2.6 v-12 h-6 v-2.6 h6Z\" fill=\"#fffaf0\"/>", "icons": {"calendar": ["M8.0 11.9 L11.2 11.7 L14.4 11.7 L17.6 11.7 L20.8 11.7 L24.0 11.8 L27.2 11.8 L30.4 11.9 L33.6 11.9 L36.8 11.9 L40.0 12.0 L39.9 15.2 L39.7 18.4 L39.5 21.7 L39.5 24.9 L39.6 28.1 L39.8 31.3 L40.0 34.6 L40.1 37.8 L40.0 41.1 L36.8 41.1 L33.6 41.1 L30.4 41.2 L27.2 41.2 L24.0 41.3 L20.8 41.3 L17.6 41.3 L14.4 41.3 L11.2 41.1 L8.1 41.0 L8.4 37.8 L8.5 34.6 L8.4 31.3 L8.3 28.1 L8.1 24.9 L8.0 21.7 L8.1 18.4 L8.1 15.2 L8.0 12.1 L12.0 12.0 L16.0 12.0", "M7.1 19.0 L10.5 18.9 L13.9 18.9 L17.2 18.8 L20.6 18.9 L24.0 19.1 L27.4 19.3 L30.8 19.4 L34.1 19.4 L37.5 19.4 L40.9 19.0", "M15.9 6.1 L15.9 9.4 L15.9 12.6 L16.0 15.9", "M31.9 6.1 L31.8 9.4 L31.8 12.6 L32.0 15.9", "M24.0 23.1 L24.2 26.6 L24.4 30.0 L24.4 33.5 L24.0 36.9", "M17.1 30.0 L20.6 29.8 L24.0 29.6 L27.4 29.5 L30.9 30.0"], "prayer-book": ["M12.0 7.1 L15.6 7.3 L19.1 7.3 L22.7 7.4 L26.3 7.4 L29.9 7.4 L33.4 7.3 L36.9 7.0 L37.0 10.3 L37.1 13.6 L37.1 16.9 L37.1 20.2 L37.1 23.5 L37.1 26.8 L37.2 30.1 L37.2 33.4 L37.2 36.7 L37.0 40.1 L33.4 40.2 L29.9 40.2 L26.3 40.2 L22.7 40.2 L19.1 40.2 L15.6 40.1 L12.0 40.0 L12.2 36.7 L12.4 33.4 L12.4 30.1 L12.4 26.8 L12.4 23.5 L12.4 20.2 L12.3 16.9 L12.2 13.6 L12.0 10.3 L12.0 6.9 L18.2 7.0", "M16.4 6.1 L16.2 9.6 L16.2 13.1 L16.2 16.5 L16.2 20.0 L16.3 23.5 L16.4 27.0 L16.6 30.5 L16.8 33.9 L16.9 37.4 L16.5 40.9", "M27.0 13.1 L27.2 16.7 L27.4 20.2 L27.5 23.8 L27.5 27.3 L27.0 30.9", "M20.6 19.5 L24.9 19.5 L29.1 19.4 L33.4 19.5", "M30.8 39.8 L31.1 46.1 L32.9 44.1 L35.1 46.0 L35.0 39.8"], "saint": ["M28.9 20.6 L26.6 22.9 L23.4 23.5 L20.4 22.4 L18.6 19.6 L18.6 16.3 L20.5 13.7 L23.5 12.6 L26.6 13.3 L28.8 15.5 L29.4 18.7 L28.1 21.5", "M29.4 9.8 L31.8 11.8 L33.4 14.5 L34.2 17.5 L33.9 20.7 L32.6 23.7 L30.4 26.0 L27.6 27.6 L24.5 28.2 L21.3 28.0 L18.3 26.8 L15.7 24.7 L13.9 21.8 L13.2 18.5 L13.7 15.2 L15.2 12.3 L17.4 9.9 L20.2 8.2 L23.4 7.4 L26.7 7.7 L29.8 9.0 L32.3 11.2", "M9.9 44.4 L10.3 41.3 L11.0 39.0 L11.9 37.0 L12.9 35.2 L14.1 33.7 L15.6 32.4 L17.3 31.3 L19.3 30.6 L21.5 30.1 L24.4 30.0", "M23.6 30.1 L26.4 30.3 L28.6 30.8 L30.6 31.5 L32.4 32.4 L33.9 33.6 L35.2 35.1 L36.2 36.9 L37.0 39.0 L37.6 41.4 L38.0 44.4"], "chi-rho": ["M24.0 5.1 L24.2 8.5 L24.2 12.0 L24.3 15.4 L24.4 18.8 L24.4 22.3 L24.3 25.7 L24.1 29.2 L24.1 32.6 L24.2 36.0 L24.2 39.5 L24.0 42.9", "M27.5 5.8 L29.2 6.3 L30.6 7.2 L31.8 8.4 L32.5 9.9 L32.6 11.5 L32.3 13.1 L31.6 14.5 L30.5 15.7 L29.1 16.5 L27.5 16.9", "M24.0 5.8 L27.5 6.0", "M24.0 16.9 L27.5 17.0", "M11.5 17.2 L14.2 19.4 L16.6 21.8 L19.1 24.2 L21.5 26.6 L24.1 28.9 L26.7 31.1 L29.3 33.4 L31.9 35.7 L34.4 38.0 L36.7 40.6", "M36.6 17.3 L33.9 19.5 L31.4 21.9 L29.0 24.3 L26.6 26.7 L24.1 29.1 L21.6 31.5 L19.1 33.9 L16.7 36.3 L14.2 38.7 L11.3 40.6"], "candle": ["M19.2 21.8 L19.4 25.2 L19.3 28.5 L19.3 31.9 L19.3 35.3 L19.2 38.6 L19.0 41.9 L22.3 41.9 L25.7 41.7 L28.8 42.0 L28.6 38.7 L28.7 35.3 L28.9 32.0 L29.0 28.7 L29.1 25.3 L29.0 21.9 L25.6 21.6 L22.2 21.7 L18.8 22.0", "M24.0 22.9 L24.0 17.1", "M24.0 17.1 L22.2 14.1 L20.4 10.9 L21.9 7.3 L24.2 3.9 L26.2 7.3 L27.7 11.1 L25.9 14.2 L23.9 17.1", "M18.5 25.2 L20.3 28.0 L22.0 30.8", "M13.7 10.6 L9.3 7.5", "M34.4 10.7 L38.7 7.5", "M12.9 17.8 L8.1 18.0", "M35.1 18.2 L39.9 18.0"], "siraj-lamp": ["M14.6 33.6 L15.2 30.6 L16.8 28.0 L19.2 26.1 L22.0 25.1 L25.0 24.9 L27.9 25.6 L30.6 27.2 L32.5 29.6 L33.5 32.6 L33.5 35.7 L32.5 38.7 L30.5 41.2 L27.8 42.9 L24.7 43.6 L21.6 43.4 L18.6 42.2 L16.1 40.2 L14.4 37.3 L13.8 34.1 L14.2 30.7", "M20.8 31.5 L23.1 30.1 L25.6 30.5 L27.4 32.2 L27.8 34.8 L26.5 37.0 L24.1 37.9 L21.7 37.1 L20.3 35.0 L20.4 32.5 L22.0 30.5", "M18.5 27.7 L20.1 23.4 L21.5 19.0 L26.5 19.0 L28.1 23.3 L29.6 27.7", "M24.1 18.0 L22.4 15.0 L20.5 12.0 L22.2 8.0 L24.0 4.0 L25.8 8.0 L27.6 12.0 L26.0 15.2 L23.9 18.1", "M24.1 42.6 L24.0 46.9", "M11.4 7.3 L15.7 10.5", "M36.6 7.3 L32.3 10.5"]}, "flames": ["<path d=\"M195 104 L224 196 L268 140 L270 232 L330 192 L345 300 L345 470 L45 470 L45 300 L60 192 L120 232 L122 140 L166 196 Z\" fill=\"#f8dbd1\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"153\" cy=\"309\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"243\" cy=\"309\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><path d=\"M114 270 L182 296 L182 258 L114 258 Z\" fill=\"#f8dbd1\"></path><path d=\"M116 271 L180 295\" stroke=\"#2b1d14\" stroke-width=\"7\" stroke-linecap=\"round\"></path><path d=\"M276 270 L208 296 L208 258 L276 258 Z\" fill=\"#f8dbd1\"></path><path d=\"M274 271 L210 295\" stroke=\"#2b1d14\" stroke-width=\"7\" stroke-linecap=\"round\"></path><rect x=\"168\" y=\"372\" width=\"54\" height=\"11\" rx=\"5.5\" fill=\"#2b1d14\"></rect>", "<path d=\"M40 180 q9 -11 18 0 t18 0 M314 180 q9 -11 18 0 t18 0 M34 226 q9 -11 18 0 t18 0 M320 226 q9 -11 18 0 t18 0\" fill=\"none\" stroke=\"#6a4f9c\" stroke-width=\"6\" stroke-linecap=\"round\" opacity=\"0.6\"></path><path d=\"M214 118 C240 213 345 224 345 330 L345 470 L45 470 L45 330 C45 224 216 213 214 118 Z\" fill=\"#6a4f9c\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"140\" cy=\"302\" rx=\"9\" ry=\"12\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"230\" cy=\"302\" rx=\"9\" ry=\"12\" fill=\"#2b1d14\"></ellipse><path d=\"M124 254 L172 244 M218 244 L266 254\" stroke=\"#2b1d14\" stroke-width=\"6\" stroke-linecap=\"round\"></path><path d=\"M162 378 q11 -11 22 0 t22 0 t22 0\" fill=\"none\" stroke=\"#fffaf0\" stroke-width=\"7\" stroke-linecap=\"round\"></path>", "<path d=\"M140 150 C132 236 340 245 340 340 L340 470 L50 470 L50 340 C50 245 108 236 140 150 Z\" fill=\"#dce4f4\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"153\" cy=\"293\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"243\" cy=\"293\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><path d=\"M126 262 L174 248 M216 248 L264 262\" stroke=\"#2b1d14\" stroke-width=\"6\" stroke-linecap=\"round\"></path><path d=\"M248 336 q-12 22 0 30 q12 -8 0 -30 Z\" fill=\"#2b93b0\" stroke=\"#2b1d14\" stroke-width=\"2.5\"></path><path d=\"M170 392 Q195 368 220 392\" fill=\"none\" stroke=\"#2b1d14\" stroke-width=\"7\" stroke-linecap=\"round\"></path>", "<path d=\"M158 200 q-16 -22 0 -44 t0 -44 M195 190 q-16 -22 0 -44 t0 -44 M232 200 q-16 -22 0 -44 t0 -44\" fill=\"none\" stroke=\"#313a55\" stroke-width=\"11\" stroke-linecap=\"round\"></path><path d=\"M195 222 C208 280 360 286 360 350 L360 470 L30 470 L30 350 C30 286 182 280 195 222 Z\" fill=\"#1f7a74\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"372\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"153\" cy=\"384\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"372\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"243\" cy=\"384\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><path d=\"M120 372 A30 36 0 0 1 180 372 Z\" fill=\"#1f7a74\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></path><path d=\"M210 372 A30 36 0 0 1 270 372 Z\" fill=\"#1f7a74\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></path><rect x=\"172\" y=\"428\" width=\"46\" height=\"10\" rx=\"5\" fill=\"#2b1d14\" opacity=\"0.6\"></rect>", "<path d=\"M195 128 C207 219 345 229 345 330 L345 470 L45 470 L45 330 C45 229 183 219 195 128 Z\" fill=\"#f2dfd3\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"153\" cy=\"304\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"243\" cy=\"304\" rx=\"13\" ry=\"17\" fill=\"#2b1d14\"></ellipse><rect x=\"168\" y=\"372\" width=\"54\" height=\"11\" rx=\"5.5\" fill=\"#2b1d14\" opacity=\"0.55\"></rect>", "<circle cx=\"195\" cy=\"250\" r=\"176\" fill=\"none\" stroke=\"#f6e2b5\" stroke-width=\"12\" opacity=\"0.6\"></circle><path d=\"M195 92 C207 195 345 206 345 320 L345 470 L45 470 L45 320 C45 206 183 195 195 92 Z\" fill=\"#e3ecd0\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><path d=\"M122 298 Q150 326 178 298 M212 298 Q240 326 268 298\" fill=\"none\" stroke=\"#2b1d14\" stroke-width=\"7\" stroke-linecap=\"round\"></path><path d=\"M172 368 Q198 390 222 364\" fill=\"none\" stroke=\"#2b1d14\" stroke-width=\"7\" stroke-linecap=\"round\"></path>", "<path d=\"M64 132 Q64 150 82 150 Q64 150 64 168 Q64 150 46 150 Q64 150 64 132 Z\" fill=\"#fffaf0\"></path><path d=\"M322 102 Q322 124 344 124 Q322 124 322 146 Q322 124 300 124 Q322 124 322 102 Z\" fill=\"#fffaf0\"></path><path d=\"M338 234 Q338 246 350 246 Q338 246 338 258 Q338 246 326 246 Q338 246 338 234 Z\" fill=\"#fffaf0\"></path><path d=\"M48 240 Q48 250 58 250 Q48 250 48 260 Q48 250 38 250 Q48 250 48 240 Z\" fill=\"#fffaf0\"></path><path d=\"M195 74 C208 180 357 192 357 310 L357 470 L33 470 L33 310 C33 192 182 180 195 74 Z\" fill=\"#f7e6bf\" stroke=\"#2b1d14\" stroke-width=\"4\" stroke-linejoin=\"round\"></path><ellipse cx=\"150\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"153\" cy=\"300\" rx=\"15\" ry=\"19\" fill=\"#2b1d14\"></ellipse><ellipse cx=\"240\" cy=\"300\" rx=\"29\" ry=\"35\" fill=\"#fffaf0\" stroke=\"#2b1d14\" stroke-width=\"3.5\"></ellipse><ellipse cx=\"243\" cy=\"300\" rx=\"15\" ry=\"19\" fill=\"#2b1d14\"></ellipse><path d=\"M153 288 Q153 296 161 296 Q153 296 153 304 Q153 296 145 296 Q153 296 153 288 Z\" fill=\"#fffaf0\"></path><path d=\"M243 288 Q243 296 251 296 Q243 296 243 304 Q243 296 235 296 Q243 296 243 288 Z\" fill=\"#fffaf0\"></path><path d=\"M150 352 Q195 432 240 352 Z\" fill=\"#a5321c\" stroke=\"#2b1d14\" stroke-width=\"3.5\" stroke-linejoin=\"round\"></path><path d=\"M174 388 Q195 372 218 388 Q207 404 195 404 Q184 404 174 388 Z\" fill=\"#f6d6cb\"></path>"], "wordmark": "M794 -175Q794 -112 673 -48Q583 0 466 0Q313 0 197 -73Q50 -165 50 -337Q50 -387 72 -451Q108 -556 185 -617Q290 -701 462 -701Q568 -701 681.0 -650.0Q794 -599 794 -552Q794 -525 767.5 -512.0Q741 -499 676 -499Q626 -499 598 -535Q537 -613 426 -613Q307 -613 256 -519Q217 -447 217 -320Q217 -186 302 -125Q366 -79 462 -79Q539 -79 585.5 -144.5Q632 -210 733 -210Q735 -210 740.5 -211.0Q746 -212 751 -212Q769 -212 781.5 -204.5Q794 -197 794 -175ZM1195.0 -85Q1194.0 -110 1193.0 -142.0Q1192.0 -174 1190.0 -213Q1188.0 -253 1187.0 -282.0Q1186.0 -311 1185.0 -331.0Q1184.0 -351 1183.5 -370.0Q1183.0 -389 1182.0 -408Q1182.0 -413 1183.5 -448.0Q1185.0 -483 1189.0 -547Q1190.0 -584 1195.0 -658Q1195.0 -681 1185.0 -694Q1171.0 -714 1137.0 -714Q1071.0 -714 1031.5 -698.0Q992.0 -682 992.0 -648Q995.0 -630 997.0 -616.0Q999.0 -602 1000.0 -591Q1004.0 -561 1005.5 -537.0Q1007.0 -513 1007.0 -496Q1007.0 -413 1006.0 -349.0Q1005.0 -285 1003.0 -238.0Q1001.0 -191 998.5 -153.0Q996.0 -115 992.0 -85Q992.0 -42 1016.0 -20Q1046.0 7 1116.0 7Q1195.0 7 1195.0 -85ZM2235.0 -358Q2235.0 -301 2224.0 -258Q2197.0 -152 2117.0 -85Q2006.0 8 1808.0 8Q1637.0 8 1537.0 -61Q1460.0 -114 1428.0 -205Q1407.0 -265 1407.0 -331Q1408.0 -356 1408.0 -358Q1408.0 -513 1523.5 -613.5Q1639.0 -714 1808.0 -714Q1979.0 -714 2104.0 -615Q2235.0 -511 2235.0 -358ZM2046.0 -325Q2046.0 -495 1953.0 -570Q1891.0 -620 1808.0 -620Q1709.0 -620 1645.0 -535Q1587.0 -458 1587.0 -325Q1587.0 -255 1635.0 -181Q1699.0 -82 1808.0 -82Q1939.0 -82 2002.0 -180Q2046.0 -248 2046.0 -325ZM3163.0 -681Q3163.0 -656 3087.0 -556Q3049.0 -505 3012.5 -456.5Q2976.0 -408 2939.0 -360Q2858.0 -249 2855.0 -226Q2853.0 -203 2852.0 -194V-170Q2852.0 -113 2857.0 -51.0Q2862.0 11 2868.0 80V95Q2868.0 99 2868.0 103Q2868.0 107 2869.0 111Q2869.0 142 2853.0 154Q2830.0 171 2768.0 171Q2746.0 171 2726.5 158.5Q2707.0 146 2707.0 131Q2715.0 51 2721.5 -29.0Q2728.0 -109 2728.0 -174Q2728.0 -218 2696.0 -291Q2682.0 -321 2663.0 -355.5Q2644.0 -390 2619.0 -429Q2591.0 -475 2527.0 -564Q2485.0 -608 2433.0 -618Q2382.0 -628 2382.0 -650Q2382.0 -670 2420.0 -690Q2469.0 -715 2556.0 -715Q2603.0 -715 2663.0 -609Q2669.0 -598 2692.0 -549.5Q2715.0 -501 2757.0 -413Q2807.0 -306 2830.0 -306Q2854.0 -306 2897.0 -412Q2927.0 -485 2949.5 -534.0Q2972.0 -583 2988.0 -608Q3053.0 -715 3129.0 -715Q3143.0 -715 3153.0 -705.0Q3163.0 -695 3163.0 -681Z"};
+
+// ---------- أدوات صغيرة ----------
+var DIG = '٠١٢٣٤٥٦٧٨٩';
+function ar(n) { return String(n).replace(/[0-9]/g, function (d) { return DIG[d]; }); }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function norm(s) {
+  return String(s || '').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+    .replace(/[،,.؛;:!؟?«»"()]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+var STAR_D = 'M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z';
+function star(size, fill, stroke) { return '<svg width="' + size + '" height="' + size + '" viewBox="-1.2 -1.2 2.4 2.4" aria-hidden="true"><path d="' + STAR_D + '" fill="' + (fill || 'var(--gold)') + '"' + (stroke ? ' stroke="' + stroke + '" stroke-width="0.08" stroke-linejoin="round"' : '') + '></path></svg>'; }
+function lamp(size) { return '<svg viewBox="0 0 120 120" width="' + size + '" height="' + size + '" aria-hidden="true">' + PARTS.lamp + '</svg>'; }
+function icon(name, size) {
+  return '<svg viewBox="0 0 48 48" width="' + size + '" height="' + size + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    (PARTS.icons[name] || []).map(function (d) { return '<path d="' + d + '"></path>'; }).join('') + '</svg>';
+}
+function wordmark(w, h, color) { return '<svg role="img" aria-label="ⲤⲒⲞⲨ" viewBox="42 -723 3129 902" width="' + w + '" height="' + h + '" style="display:block;color:' + (color || 'currentColor') + '"><path d="' + PARTS.wordmark + '" fill="currentColor"></path></svg>'; }
+
+// ---------- التخزين على الجهاز ----------
+var KEY = 'siou.v1';
+var store = { stars: {}, scores: {}, demo: null, installHidden: false };
+try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved) store = Object.assign(store, saved); } catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+
+// ---------- التاريخ ----------
+var DEMO_DATE = [2026, 11, 15];   // الحد ٦ هاتور ١٧٤٣: اليوم اللي محتواه كامل
+function appDate() {
+  if (store.demo) return store.demo;
+  var n = new Date(); return [n.getFullYear(), n.getMonth() + 1, n.getDate()];
+}
+function day() {
+  var d = appDate(), r = E.readingsFor(d[0], d[1], d[2]);
+  r.key = r.coptic.year + '-' + r.coptic.month + '-' + r.coptic.day;
+  r.g = d;
+  return r;
+}
+var WEEKDAYS = ['الحد', 'الاتنين', 'التلات', 'الأربع', 'الخميس', 'الجمعة', 'السبت'];
+var GMONTHS = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+function gLabel(r) { return WEEKDAYS[r.weekday] + ' ' + ar(r.g[2]) + ' ' + GMONTHS[r.g[1] - 1] + ' ' + ar(r.g[0]); }
+function cLabel(r) { return ar(r.coptic.day) + ' ' + r.coptic.monthName + ' ' + ar(r.coptic.year); }
+function inNativityFast(c) { return (c.month === 3 && c.day >= 16) || (c.month === 4 && c.day < 29); }
+
+// ---------- محتوى الأيام اللي اتراجعت ----------
+// آية اليوم والتأمل والسنكسار: لحد دلوقتي يوم واحد كامل. باقي الأيام بتعرض القراءات بس.
+var LUKE_8_15 = ['وَالَّذِي', 'فِي', 'الأَرْضِ', 'الْجَيِّدَةِ،', 'هُوَ', 'الَّذِينَ', 'يَسْمَعُونَ', 'الْكَلِمَةَ', 'فَيَحْفَظُونَهَا', 'فِي', 'قَلْبٍ', 'جَيِّدٍ', 'صَالِحٍ،', 'وَيُثْمِرُونَ', 'بِالصَّبْرِ.'];
+var CONTENT = {
+  '1743-3-6': {
+    theme: 'مثل الزارع',
+    gospel: 'لو ٨: ٤–١٥',
+    opening: 'قفوا بخوف أمام الله، وانصتوا لسماع الإنجيل المقدس. فصل شريف من بشارة معلمنا لوقا الإنجيلي. بركته تكون مع جميعنا، آمين.',
+    verse: { ref: 'لو ٨: ١٥', words: LUKE_8_15, gaps: [6, 8, 11, 13] },
+    question: 'قلبي النهارده شبه أنهي أرض من الأربعة؟',
+    reflection: 'الزارع رمى نفس البذرة في ٤ أراضي: طريق، وصخر، وشوك، وأرض جيدة. البذرة ماتغيرتش. اللي اتغيّر هو الأرض اللي وقعت فيها. والأرض الجيدة بتعمل ٣ حاجات:',
+    steps: ['تسمع', 'تحفظ', 'تثمر'],
+    synaxarium: ['تذكار تكريس كنيسة السيدة العذراء بدير المحرق بجبل قسقام', 'نياحة القديس فيلكس بابا روما']
+  }
+};
+
+// ---------- الصور وصورة كل مناسبة ----------
+var IMAGES = {
+  'virgin-tapestry': { focus: '50% 44%', title: 'أيقونة العذراء والطفل', meta: 'نسيج صوف · مصر، القرن السادس', body: 'العذراء قاعدة على عرش وشايلة المسيح، وجنبها ملاكين. مكتوب فوقهم باليوناني: القديس ميخائيل، القديسة مريم، القديس غبريال. وحوالين الأيقونة إطار فيه وشوش الاتناشر رسول، كل واحد باسمه. طولها حوالي ١٧٩ سم.', source: 'متحف كليفلاند للفنون، رقم ١٩٦٧.١٤٤ · ملكية عامة' },
+  'mena': { focus: '50% 16%', title: 'أيقونة المسيح والأنبا مينا', meta: 'رسم بالشمع على خشب · دير باويط، النص التاني من القرن السادس', body: 'المسيح شايل الإنجيل وحاطط إيده على كتف الأنبا مينا، رئيس دير الأنبا أبوللو في باويط. ده مش مارمينا العجايبي الشهيد. مكتوب فوق المسيح «المخلّص»، وفوق الأنبا مينا «أبا مينا الرئيس». موجودة دلوقتي في متحف اللوفر.', source: 'متحف اللوفر، رقم E11565 · الصورة ملكية عامة على ويكيميديا' },
+  'codex-cross': { focus: '50% 42%', title: 'صليب من مخطوط ليتورجي قبطي', meta: 'حبر أسود وملوّن على ورق من فينيسيا · القرن ١٧–١٨', body: 'كتاب صلوات صغير، طوله حوالي ١٥ سم، يعني كان بيتشال في الإيد. الصفحة دي فيها صليب كبير مزخرف، والصفحة اللي جنبه مزوّقة بنفس الحبر.', source: 'متحف المتروبوليتان، رقم ١٩.١٩٦.٥ · ملكية عامة' },
+  'saint-ostracon': { focus: '30% 52%', title: 'رسم قديس قبطي', meta: 'حجر جيري ملوّن · البر الغربي بالأقصر، القرن ٦–٧', body: 'رسم بسيط لوش قديس، اتلقى على حيطة مقبرة مصرية قديمة في الدير البحري. في القرون دي سكن رهبان ونسّاك في مقابر كتير في البر الغربي.', source: 'متحف المتروبوليتان، رقم ٢٣.٣.٧٦١ · ملكية عامة' },
+  'three-saints': { focus: '50% 30%', title: 'نسيج عليه تلات قديسين', meta: 'قطن متطرّز بخيط دهب وحرير · مصر، القرن ١٢', body: 'تلات قديسين واقفين تحت تلات عقود، متطرزين بخيوط ملفوفة بالدهب. المتحف ما ذكرش أساميهم.', source: 'متحف المتروبوليتان، رقم ٢٩.١٠٦ · ملكية عامة' },
+  'lamp': { focus: '50% 50%', title: 'سراج من فخار', meta: 'فخار معمول بقالب · مصر، القرن ٥–٦', body: 'سراج زيت صغير، عرضه ١١ سم. كان بيتحط فيه زيت وفتيلة وينوّر. ومن هنا جه اسم «سراج».', source: 'متحف المتروبوليتان، رقم ٢٧.٩٤.٢٤ · ملكية عامة' }
+};
+// أول مناسبة تنطبق بتكسب (نفس جدول img/occasions.json)
+function occasion(r) {
+  var c = r.coptic, sun = r.weekday === 0;
+  var sundayN = Math.floor((c.day - 1) / 7) + 1;
+  var ORD = ['الأول', 'التاني', 'التالت', 'الرابع', 'الخامس'];
+  if (c.month === 3 && c.day === 6) return { img: 'virgin-tapestry', line: 'تذكار تكريس كنيسة العذراء بالمحرق', why: 'النهارده تذكار تكريس كنيسة السيدة العذراء بدير المحرق.' };
+  if (c.day === 21) return { img: 'virgin-tapestry', line: 'تذكار السيدة العذراء', why: 'يوم ٢١ من كل شهر قبطي تذكار للسيدة العذراء.' };
+  if (c.month === 3 && c.day === 12) return { img: null, line: 'عيد رئيس الملائكة ميخائيل', why: '' };
+  if (c.month === 3 && c.day === 15) return { img: 'saint-ostracon', line: 'استشهاد مارمينا العجايبي', why: 'النهارده تذكار قديس، والصورة دي لقديس قبطي من نفس الزمن تقريبًا، مش لمارمينا نفسه.' };
+  if (inNativityFast(c)) return { img: 'codex-cross', line: sun ? 'الأحد ' + ORD[sundayN - 1] + ' من ' + c.monthName : 'صوم الميلاد', why: 'إحنا في صوم الميلاد، فالصورة صليب.' };
+  if (sun) return { img: 'mena', line: 'الأحد ' + ORD[sundayN - 1] + ' من ' + c.monthName, why: 'النهارده الأحد، يوم الرب، فالصورة أيقونة المسيح.' };
+  return { img: 'lamp', line: '', why: 'يوم عادي. السراج هو رمز سراج.' };
+}
+
+// ---------- الراوتر ----------
+var route = (location.hash || '#home').slice(1);
+var ui = { info: false, story: null, storyBlob: null };
+window.addEventListener('hashchange', function () { route = (location.hash || '#home').slice(1); ui.info = false; render(); window.scrollTo(0, 0); });
+function go(r) { if (('#' + r) === location.hash) render(); else location.hash = r; }
+var app = document.getElementById('app');
+function toast(msg) {
+  var t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function () { t.remove(); }, 2600);
+}
+
+// ---------- أجزاء مشتركة ----------
+function header(title, sub, opts) {
+  opts = opts || {};
+  return '<header class="hdr' + (opts.cls ? ' ' + opts.cls : '') + '"><span class="pat"></span>' +
+    '<button class="ring" data-act="nav" data-to="home" aria-label="سراج · الرئيسية" style="width:40px;height:40px">' + lamp(40) + '</button>' +
+    '<div style="position:relative;display:flex;flex-direction:column;flex:1;min-width:0"><span class="hdr-title">' + title + '</span>' + (sub ? '<span class="hdr-sub">' + sub + '</span>' : '') + '</div>' +
+    (opts.end || '') + '</header>';
+}
+function nav(cur) {
+  var items = [['home', 'النهارده', icon('siraj-lamp', 22)], ['agpeya', 'الأجبية', icon('prayer-book', 22)], ['sky', 'السما', star(22, 'none', 'currentColor').replace('fill="none"', 'fill="none" stroke-width="0.12"')]];
+  return '<nav class="nav" aria-label="التنقل">' + items.map(function (it) {
+    return '<button data-act="nav" data-to="' + it[0] + '"' + (cur === it[0] ? ' aria-current="page"' : '') + '><span class="ic">' + it[2] + '</span>' + it[1] + '</button>';
+  }).join('') + '</nav>';
+}
+function monthStars(r) {
+  var n = 0; for (var d = 1; d <= 30; d++) if (store.stars[r.coptic.year + '-' + r.coptic.month + '-' + d]) n++; return n;
+}
+function demoBar(r) {
+  if (!store.demo) return '';
+  return '<div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>بتجرّب يوم ' + gLabel(r) + '</span><button class="pill" data-act="real">ارجع للنهارده</button></div>';
+}
+function infoSheet(r) {
+  var o = occasion(r); if (!ui.info || !o.img) return '';
+  var I = IMAGES[o.img];
+  return '<div class="sheet-wrap" data-act="closeInfo"><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="info-t" data-stop="1">' +
+    '<span class="grab" aria-hidden="true"></span>' +
+    '<div style="display:flex;gap:14px;align-items:center"><img src="img/' + o.img + '.jpg" alt="" style="width:72px;height:88px;object-fit:cover;object-position:' + I.focus + ';border-radius:999px 999px 8px 8px;box-shadow:0 0 0 1.5px var(--ink),0 0 0 4px var(--page-raised),0 0 0 5.5px var(--gold);flex-shrink:0">' +
+    '<div><h2 id="info-t" style="font-size:20px">' + I.title + '</h2><p class="muted" style="margin:0;font-size:13px;line-height:20px">' + I.meta + '</p></div></div>' +
+    '<p style="margin:0;font-size:15px;line-height:26px">' + I.body + '</p>' +
+    (o.why ? '<p class="note" style="margin:0"><b style="font-family:var(--display)">ليه النهارده؟ </b>' + o.why + '</p>' : '') +
+    '<p class="muted" style="margin:0;font-size:12px;line-height:18px">' + I.source + '</p>' +
+    '<button class="btn" data-act="closeInfo">تمام</button></section></div>';
+}
+function seasonCard(r) {
+  var o = occasion(r);
+  var pic = o.img
+    ? '<img src="img/' + o.img + '.jpg" alt="' + esc(IMAGES[o.img].title) + '" style="object-position:' + IMAGES[o.img].focus + '"><button class="info-chip" data-act="info" aria-haspopup="dialog"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>عن الصورة</button>'
+    : '<div class="pic-fallback">' + lamp(120) + '</div>';
+  var season = r.season !== 'annual' ? 'زمن الكنيسة' : inNativityFast(r.coptic) ? 'صوم الميلاد' : 'زمن الكنيسة · القطمارس السنوي';
+  return '<section class="season"><div class="pic">' + pic + '</div><div style="display:flex;flex-direction:column;gap:2px;padding:0 8px">' +
+    '<p style="margin:0;font-size:12px;line-height:16px;letter-spacing:.04em;opacity:.85">' + season + '</p>' +
+    '<div class="row" style="align-items:baseline"><p style="margin:0;font-family:var(--display);font-size:28px;line-height:40px;font-weight:700">' + cLabel(r) + '</p><p style="margin:0;font-size:13px">' + gLabel(r).split(' ').slice(1).join(' ') + '</p></div>' +
+    (o.line ? '<p style="margin:2px 0 0;font-size:13px;line-height:18px;opacity:.85">' + o.line + '</p>' : '') + '</div></section>';
+}
+
+// ---------- الشاشة الرئيسية ----------
+function screenHome() {
+  var r = day(), C = CONTENT[r.key], lit = !!store.stars[r.key];
+  var hdr = '<header class="hdr" style="justify-content:space-between"><span class="pat"></span>' +
+    '<button class="ring" data-act="nav" data-to="home" aria-label="ⲤⲒⲞⲨ · الرئيسية" style="box-shadow:none;gap:12px;color:var(--on-lapis)"><span class="ring" style="width:46px;height:46px">' + lamp(46) + '</span>' +
+    '<span dir="ltr" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">' + wordmark(104, 30) +
+    '<span style="font-family:Marcellus,Georgia,serif;font-size:11.5px;line-height:14px;letter-spacing:.18em;opacity:.85">SIOU · <span style="font-family:var(--body);letter-spacing:0">نجمة</span></span></span></button>' +
+    '<button data-act="nav" data-to="sky" aria-label="' + ar(monthStars(r)) + ' نجوم في ' + r.coptic.monthName + '" style="position:relative;background:none;border:none;color:var(--on-lapis);min-height:44px;display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:18px;font-weight:700;cursor:pointer">' + star(18) + ar(monthStars(r)) + '</button></header>';
+  var h = '<div class="screen">' + hdr + '<main>' + demoBar(r) + seasonCard(r);
+  if (r.status === 'missing') {
+    h += '<div class="card-soft" style="display:flex;flex-direction:column;gap:12px"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2>' +
+      '<p style="margin:0;font-size:15px;line-height:26px">القطمارس اللي اتراجع لحد دلوقتي هو شهر هاتور، وبيبدأ الاتنين ١٠ نوفمبر. لحد ما ييجي، جرّب يوم كامل من هاتور.</p>' +
+      '<button class="btn" data-act="demo">جرّب يوم الحد ١٥ نوفمبر (٦ هاتور)</button></div>';
+  } else if (C) {
+    var w = C.verse.words.join(' ');
+    h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>آية اليوم</h2><article class="card" style="display:flex;flex-direction:column;gap:12px">' +
+      '<p class="verse">' + w + '</p><span class="ref" style="align-self:flex-start">' + C.verse.ref + ' · فاندايك</span>' +
+      '<div style="height:1px;background:var(--rule)"></div><p style="margin:0;font-size:15px;line-height:26px"><b style="font-family:var(--display)">وأنا؟ </b>' + C.question + '</p>' +
+      '<button data-act="nav" data-to="readings" style="align-self:flex-start;background:none;border:none;color:var(--lapis);font-weight:600;font-size:14px;min-height:44px;cursor:pointer;padding:0">اقرا التأمل والقراءات ←</button></article></section>';
+  } else {
+    h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>قراءات النهارده</h2><div class="card-soft" style="display:flex;flex-direction:column;gap:10px">' +
+      '<p style="margin:0">إنجيل القداس: <b>' + r.display.LG.join('، ') + '</b></p>' +
+      '<p class="muted" style="margin:0;font-size:14px;line-height:22px">آية اليوم والتأمل لسه بيتكتبوا للأيام دي. القراءات نفسها جاهزة.</p>' +
+      '<button class="btn" data-act="nav" data-to="readings">كل قراءات اليوم</button></div></section>';
+  }
+  // النجمة والأسبوع
+  var dots = '';
+  for (var i = 0; i < 7; i++) {
+    var off = i - r.weekday, jdn = E.copticToJdn(r.coptic.year, r.coptic.month, r.coptic.day) + off, c = E.jdnToCoptic(jdn);
+    var k = c.year + '-' + c.month + '-' + c.day, on = !!store.stars[k], isToday = off === 0, future = off > 0;
+    var dotStyle = on ? 'background:var(--gold);box-shadow:0 0 0 1.5px var(--ink)' : isToday ? 'border:2px dashed var(--lapis);background:var(--gold-soft)' : future ? 'background:var(--page)' : 'box-shadow:inset 0 0 0 1.5px var(--rule)';
+    dots += '<div><span class="dot" style="' + dotStyle + '"></span>' + (isToday ? '<b style="color:var(--lapis)">النهارده</b>' : WEEKDAYS[i]) + '</div>';
+  }
+  h += '<section class="card-soft" style="display:flex;flex-direction:column;gap:16px"><div class="row"><h2>نجمتك</h2><span class="muted" style="font-size:13px"><b style="font-family:var(--display);font-size:18px;color:var(--ink)">' + ar(monthStars(r)) + '</b> نجوم في ' + r.coptic.monthName + '</span></div>' +
+    '<div class="week">' + dots + '</div>' +
+    (C ? (lit ? '<button class="btn" data-act="nav" data-to="sky" style="background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink)">' + star(20, 'var(--gold)', 'var(--ink)') + 'نجمة النهارده منوّرة. شوف سماك</button>'
+      : '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + 'احفظ الآية ونوّر نجمة النهارده</button>')
+      : '<p class="muted" style="margin:0;font-size:14px">النجمة بتنوّر لما تحفظ آية اليوم. الأيام اللي فيها آية هتظهر هنا.</p>') + '</section>';
+  // المكتبة
+  var tiles = [['readings', 'القطمارس', icon('calendar', 28)], ['agpeya', 'الأجبية', icon('prayer-book', 28)], ['saint', 'السنكسار', icon('saint', 28)],
+    ['bible', 'الكتاب المقدس', icon('chi-rho', 28)], ['feeling', 'حاسس بإيه؟', icon('candle', 28)], ['sky', 'السما', star(28, 'var(--gold)', 'var(--ink)')]];
+  h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>المكتبة</h2><div class="tiles">' + tiles.map(function (t) {
+    return '<button class="tile" data-act="' + (t[0] === 'bible' ? 'soon' : 'nav') + '" data-to="' + t[0] + '"><span class="arch"' + (t[0] === 'sky' ? ' style="background:var(--lapis);box-shadow:inset 0 0 0 1.5px var(--ink)"' : '') + '><span class="halo">' + t[2] + '</span></span>' + t[1] + '</button>';
+  }).join('') + '</div></section>';
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+  if (!store.installHidden && !standalone) h += '<div class="note" style="display:flex;flex-direction:column;gap:8px"><b style="font-family:var(--display)">ثبّت سيو على موبايلك</b><span>آيفون: من سفاري دوس زرار المشاركة واختار «إضافة إلى الشاشة الرئيسية». أندرويد: من قايمة كروم اختار «تثبيت التطبيق».</span><button class="pill" data-act="hideInstall" style="align-self:flex-start">تمام</button></div>';
+  h += '</main>' + nav('home') + infoSheet(r) + '</div>';
+  return h;
+}
+
+// ---------- القراءات ----------
+function screenReadings() {
+  var r = day(), C = CONTENT[r.key];
+  var h = '<div class="screen">' + header('قراءات اليوم', r.status === 'missing' ? cLabel(r) : (r.title + ' · ' + cLabel(r))) + '<main>' + demoBar(r);
+  if (r.status === 'missing') return h + '<div class="card-soft"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2><p>جرّب يوم من هاتور لحد ما الشهر ده يتراجع.</p><button class="btn" data-act="demo">جرّب يوم الحد ١٥ نوفمبر</button></div></main>' + nav('') + '</div>';
+  if (C) {
+    h += '<section style="text-align:center;display:flex;flex-direction:column;gap:4px"><h1 style="margin:0;font-family:var(--display);font-size:32px;line-height:46px;color:var(--lapis)">' + C.theme + '</h1><p class="muted" style="margin:0;font-size:14px">إنجيل القداس · ' + C.gospel + '</p></section>' +
+      '<section style="display:flex;flex-direction:column;gap:12px"><p class="muted" style="margin:0;font-size:14px;line-height:24px;text-align:center">' + C.opening + '</p>' +
+      '<article class="card"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref">' + C.verse.ref + ' · فاندايك</span></article></section>' +
+      '<section style="display:flex;flex-direction:column;gap:12px"><h2>التأمل</h2><p style="margin:0;line-height:28px">' + C.reflection + '</p>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">' + C.steps.map(function (s, i) {
+        return '<div style="background:var(--page-raised);border-radius:999px 999px 12px 12px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:20px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:36px;height:36px;border-radius:999px;background:var(--ochre-soft);box-shadow:inset 0 0 0 2px var(--ochre);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700">' + ar(i + 1) + '</span><b>' + s + '</b></div>';
+      }).join('') + '</div><p class="note" style="margin:0;background:var(--ochre-soft)"><b style="font-family:var(--display)">وأنا؟ </b>' + C.question + '</p></section>';
+  }
+  var groups = [['العشية', [['VP', 'المزمور'], ['VG', 'الإنجيل']]], ['باكر', [['MP', 'المزمور'], ['MG', 'الإنجيل']]], ['القداس', [['PA', 'البولس'], ['CA', 'الكاثوليكون'], ['AC', 'الإبركسيس'], ['LP', 'المزمور'], ['LG', 'الإنجيل']]]];
+  h += groups.map(function (g) {
+    return '<section style="display:flex;flex-direction:column;gap:8px"><h2>' + g[0] + '</h2><div class="list">' + g[1].map(function (s) {
+      return '<div><b style="font-weight:600">' + s[1] + '</b><span class="muted" style="font-size:14px;text-align:left">' + r.display[s[0]].join('<br>') + '</span></div>';
+    }).join('') + '</div></section>';
+  }).join('');
+  h += '<p class="muted" style="margin:0;font-size:12px;text-align:center">الشواهد من قطمارس موقع الأنبا تكلا، بعد مراجعة خادم. المزامير بترقيم فاندايك، ورقم القطمارس المطبوع جنبها.</p>';
+  if (C) h += '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + 'يلا نحفظ الآية</button>';
+  return h + '</main>' + nav('') + '</div>';
+}
+
+// ---------- السنكسار ----------
+function screenSaint() {
+  var r = day(), C = CONTENT[r.key], o = occasion(r);
+  var pic = o.img ? '<div style="position:relative;align-self:center"><img src="img/' + o.img + '.jpg" alt="' + esc(IMAGES[o.img].title) + '" style="display:block;width:240px;height:300px;object-fit:cover;object-position:' + IMAGES[o.img].focus + ';border-radius:999px 999px 12px 12px;box-shadow:0 0 0 2px var(--ink),0 0 0 6px var(--page),0 0 0 8px var(--gold)"><button class="info-chip" data-act="info" style="left:50%;bottom:-14px;transform:translateX(-50%)">عن الصورة</button></div>' : '';
+  var h = '<div class="screen">' + header('السنكسار', cLabel(r)) + '<main>' + demoBar(r) + pic + '<h1 style="margin:8px 0 0;font-family:var(--display);font-size:24px;color:var(--lapis);text-align:center">تذكارات النهارده</h1>';
+  if (C && C.synaxarium) h += C.synaxarium.map(function (s, i) { return '<article class="' + (i ? 'card-soft' : 'card') + '" style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:13px">' + ar(i + 1) + '</span><b style="font-family:var(--display);font-size:18px;line-height:28px">' + s + '</b></article>'; }).join('') +
+    '<p class="muted" style="margin:0;font-size:12px;text-align:center">العناوين من سنكسار موقع الأنبا تكلا. الملخصات جاية بعد المراجعة.</p>';
+  else h += '<div class="card-soft"><p style="margin:0">سنكسار اليوم ده لسه بيتجهز.' + (o.line ? ' النهارده: <b>' + o.line + '</b>.' : '') + '</p></div>';
+  return h + '</main>' + nav('') + infoSheet(r) + '</div>';
+}
+
+// ---------- الأجبية ----------
+var HOURS = [['باكر', 'قيامة المسيح', 'الصبح بدري'], ['الساعة التالتة', 'حلول الروح القدس، ومحاكمة المسيح', '٩ الصبح'], ['الساعة السادسة', 'صلب المسيح', '١٢ الضهر'], ['الساعة التاسعة', 'موت المسيح بالجسد على الصليب', '٣ العصر'], ['الغروب', 'إنزال جسد المسيح من على الصليب', 'المغرب'], ['النوم', 'وضع جسد المسيح في القبر', 'قبل النوم'], ['نصف الليل', 'المجيء التاني · ٣ خدمات', 'بالليل']];
+function currentHour() { var hh = new Date().getHours(); return hh < 5 ? 6 : hh < 9 ? 0 : hh < 12 ? 1 : hh < 15 ? 2 : hh < 17 ? 3 : hh < 20 ? 4 : 5; }
+function screenAgpeya() {
+  var cur = currentHour(), H = HOURS[cur];
+  var h = '<div class="screen">' + header('الأجبية', 'صلوات السواعي') + '<main>' +
+    '<section style="background:var(--lapis);color:var(--on-lapis);border-radius:18px;padding:24px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center">' +
+    '<span style="width:64px;height:64px;border-radius:999px;background:var(--gold-soft);color:var(--ink);box-shadow:inset 0 0 0 3px var(--gold);display:flex;align-items:center;justify-content:center">' + icon('prayer-book', 34) + '</span>' +
+    '<span style="font-size:13px;opacity:.85">الساعة دلوقتي</span><b style="font-family:var(--display);font-size:28px;line-height:40px">صلاة ' + H[0] + '</b><span style="font-size:14px">بنفتكر فيها ' + H[1] + '</span>' +
+    '<button class="btn" data-act="soon" style="margin-top:8px;background:var(--gold-soft);color:var(--ink);border-radius:999px">ابدأ الصلاة</button></section>' +
+    '<section style="display:flex;flex-direction:column;gap:8px"><h2>السواعي</h2><div class="list">' + HOURS.map(function (x, i) {
+      return '<div style="' + (i === cur ? 'background:var(--gold-soft)' : '') + '"><span style="display:flex;flex-direction:column"><b>' + x[0] + '</b><span class="muted" style="font-size:13px">' + x[1] + '</span></span><span class="muted" style="font-size:13px;white-space:nowrap">' + (i === cur ? '<b style="color:var(--lapis)">دلوقتي</b>' : x[2]) + '</span></div>';
+    }).join('') + '</div><p class="muted" style="margin:0;font-size:12px">نص الصلوات من أجبية موقع الأنبا تكلا، هيتضاف بعد المراجعة.</p></section></main>' + nav('agpeya') + '</div>';
+  return h;
+}
+
+// ---------- السما ----------
+function skyPositions() {
+  // ٣٠ نجمة في ٥ صفوف بشكل متعرّج، بتبدأ من فوق يمين
+  var p = [];
+  for (var row = 0; row < 5; row++) for (var col = 0; col < 6; col++) {
+    var x = row % 2 === 0 ? 300 - col * 52 : 40 + col * 52, y = 50 + row * 66 + (col % 2 ? 18 : 0);
+    p.push([x, y]);
+  }
+  return p;
+}
+function screenSky() {
+  var r = day(), pos = skyPositions(), c = r.coptic, n = monthStars(r);
+  var svg = '<svg role="img" aria-label="' + ar(n) + ' نجوم منوّرة في ' + c.monthName + '" viewBox="0 0 340 380" width="100%" style="max-width:380px;display:block;margin:0 auto">';
+  var lines = '';
+  for (var d = 1; d < 30; d++) {
+    var a = store.stars[c.year + '-' + c.month + '-' + d], b = store.stars[c.year + '-' + c.month + '-' + (d + 1)];
+    if (a && b) lines += '<path d="M' + pos[d - 1][0] + ' ' + pos[d - 1][1] + ' L' + pos[d][0] + ' ' + pos[d][1] + '" stroke="var(--gold)" stroke-width="1.4" stroke-dasharray="3 5" stroke-linecap="round" opacity="0.7"></path>';
+  }
+  svg += lines;
+  for (var dd = 1; dd <= 30; dd++) {
+    var p = pos[dd - 1], k = c.year + '-' + c.month + '-' + dd, lit = !!store.stars[k], today = dd === c.day, past = dd < c.day;
+    // الأنيميشن على جروب جوّه، عشان الـ transform بتاعه ما يمسحش مكان النجمة
+    if (lit) svg += '<g transform="translate(' + p[0] + ' ' + p[1] + ')"><g' + (today ? ' class="rise" style="transform-box:fill-box;transform-origin:center"' : '') + '><circle r="' + (today ? 19 : 14) + '" fill="#3b2f16" stroke="var(--gold)" stroke-width="1.5"></circle><path d="' + STAR_D + '" transform="scale(' + (today ? 11 : 8.5) + ')" fill="var(--gold)"></path></g></g>';
+    else if (today) svg += '<g transform="translate(' + p[0] + ' ' + p[1] + ')"><circle r="19" fill="#3b2f16" stroke="var(--gold)" stroke-width="2" stroke-dasharray="4 4"></circle><path d="' + STAR_D + '" transform="scale(11)" fill="none" stroke="var(--gold)" stroke-width="0.12"></path></g>';
+    else if (past) svg += '<g transform="translate(' + p[0] + ' ' + p[1] + ')"><path d="' + STAR_D + '" transform="scale(8)" fill="none" stroke="var(--vigil-muted)" stroke-width="0.12" stroke-dasharray="0.25 0.2"></path></g>';
+    else svg += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="2.4" fill="var(--vigil-muted)" opacity="0.4"></circle>';
+    if (c.month === 3 && dd === 12) svg += '<path d="M' + p[0] + ' ' + (p[1] - 16) + ' V' + (p[1] - 8) + ' M' + (p[0] - 4) + ' ' + (p[1] - 12) + ' H' + (p[0] + 4) + '" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"></path>';
+    svg += '<text x="' + p[0] + '" y="' + (p[1] + (today ? 34 : lit ? 28 : past ? 22 : 16)) + '" text-anchor="middle" font-size="11" fill="' + (today ? 'var(--gold)' : 'var(--vigil-muted)') + '"' + (today ? ' font-weight="700"' : '') + '>' + (today ? 'النهارده' : ar(dd)) + '</text>';
+  }
+  svg += '</svg>';
+  var pastDays = Math.max(0, c.day - 1), litPast = 0;
+  for (var q = 1; q < c.day; q++) if (store.stars[c.year + '-' + c.month + '-' + q]) litPast++;
+  var h = '<div class="screen dark" style="background:var(--vigil)">' +
+    '<div style="padding-block:24px 0;padding-left:var(--gut-l);padding-right:var(--gut-r);display:flex;align-items:center;justify-content:space-between"><button class="ring" data-act="nav" data-to="home" aria-label="سراج · الرئيسية" style="width:40px;height:40px">' + lamp(40) + '</button>' + wordmark(70, 20, 'var(--vigil-muted)') + '</div>' +
+    '<header style="padding:20px 20px 0;display:flex;align-items:flex-end;justify-content:space-between"><div><p style="margin:0;font-size:13px;color:var(--vigil-muted)">سما الشهر · ' + ar(c.year) + ' للشهداء</p><h1 style="margin:0;font-family:var(--display);font-size:32px;line-height:46px">سما ' + c.monthName + '</h1></div>' +
+    '<div><span style="font-family:var(--display);font-size:44px;font-weight:700;color:var(--gold)">' + ar(n) + '</span> <span style="color:var(--vigil-muted);font-size:14px">من ٣٠</span></div></header>' +
+    '<main style="padding-top:12px;gap:16px">' + svg +
+    '<div style="background:var(--vigil-raised);border-radius:18px;box-shadow:inset 0 0 0 1px var(--vigil-rule);display:grid;grid-template-columns:1fr 1fr">' +
+    '<div style="padding:16px"><b style="font-family:var(--display);font-size:24px">' + ar(litPast) + ' من ' + ar(pastDays) + '</b><br><span style="font-size:13px;color:var(--vigil-muted)">أيام فاتت نوّرت فيها نجمتك</span></div>' +
+    '<div style="padding:16px;box-shadow:inset 1px 0 0 var(--vigil-rule)"><b style="font-family:var(--display);font-size:24px">٧ نجوم</b><br><span style="font-size:13px;color:var(--vigil-muted)">ورا بعض تعمل كوكبة</span></div></div>' +
+    (c.month === 3 && c.day < 16 ? '<div style="background:#3b2f16;border-radius:10px;padding:12px 16px;font-size:14px">صوم الميلاد بيبدأ ١٦ هاتور، الأربع ٢٥ نوفمبر</div>' : '') +
+    '</main>' + nav('sky').replace('class="nav"', 'class="nav nav-dark"') + '</div>';
+  return h;
+}
+
+// ---------- حاسس بإيه ----------
+var MOODS = [
+  { label: 'متضايق', ref: 'مز ٣٧', bg: '#a5321c', fg: '#fffaf0' }, { label: 'قلقان', ref: 'مز ٢٣', bg: '#e3dcf1', fg: '#2b1d14' },
+  { label: 'زعلان', ref: 'مز ٤٢', bg: '#2f56a6', fg: '#fffaf0' }, { label: 'تعبان', ref: 'مز ٦٢', bg: '#121726', fg: '#f4ead8' },
+  { label: 'عادي', ref: 'مز ١', bg: '#ead9b9', fg: '#2b1d14' }, { label: 'في سلام', ref: 'مز ٤', bg: '#6c8a35', fg: '#fffaf0' },
+  { label: 'فرحان', ref: 'مز ١٠٠', bg: '#d4952a', fg: '#2b1d14' }];
+var feel = { mood: 5, chosen: false };
+function screenFeeling() {
+  var m = MOODS[feel.mood];
+  return '<div class="screen"><section id="mood-hero" style="position:relative;height:min(440px,52vh);overflow:hidden;border-radius:0 0 28px 28px;background:' + m.bg + ';transition:background 200ms">' +
+    '<div style="position:relative;z-index:1;padding:24px 20px 0;display:flex;align-items:center;justify-content:space-between"><button class="ring" data-act="nav" data-to="home" aria-label="سراج · الرئيسية" style="width:40px;height:40px">' + lamp(40) + '</button>' +
+    '<span id="mood-fg" style="font-family:var(--display);font-size:16px;font-weight:700;color:' + m.fg + '">شعلة سراجك النهارده</span></div>' +
+    '<svg id="mood-svg" role="img" aria-label="' + m.label + '" viewBox="0 0 390 440" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0;width:100%;height:100%">' + PARTS.flames[feel.mood] + '</svg></section>' +
+    '<main style="text-align:center;gap:18px;padding-top:24px"><div><h1 style="margin:0;font-family:var(--display);font-size:26px;line-height:38px">حاسس بإيه النهارده؟</h1><p class="muted" style="margin:6px 0 0;font-size:15px;line-height:24px">حرّك الدايرة لحد ما الشعلة تبقى شبهك، وهنديك مزمور تكلّم ربنا بيه.</p></div>' +
+    '<p id="mood-label" aria-live="polite" style="margin:0;font-family:var(--display);font-size:22px;font-weight:700;color:var(--lapis)">' + m.label + '</p>' +
+    '<div><input class="mood" type="range" min="0" max="6" step="1" value="' + feel.mood + '" data-in="mood" aria-label="مستوى إحساسك" aria-valuetext="' + m.label + '"><div class="row muted" style="font-size:12px"><span>متضايق</span><span>فرحان</span></div></div>' +
+    '<button class="btn" data-act="chooseMood" style="align-self:center;border-radius:999px;padding:0 40px">يلا</button>' +
+    '<div id="mood-result">' + moodResult() + '</div>' +
+    '<p class="muted" style="margin:auto 0 0;font-size:13px">اختيارك مش بيتحفظ في أي حتة.</p><p class="note" style="margin:0">لو محتاج تتكلم، كلّم أب اعترافك أو خادمك.</p></main>' + nav('') + '</div>';
+}
+function moodResult() {
+  if (!feel.chosen) return '';
+  var m = MOODS[feel.mood];
+  return '<section role="status" class="card" style="text-align:start;display:flex;flex-direction:column;gap:8px"><span class="muted" style="font-size:13px">' + m.label + '؟ اقرا معانا</span>' +
+    '<div class="row"><b style="font-family:var(--display);font-size:24px;color:var(--lapis)">' + m.ref + '</b><span class="muted" style="font-size:12px">[قيد المراجعة]</span></div>' +
+    '<button class="btn" data-act="soon">افتح المزمور</button></section>';
+}
+function updateMood(v) {
+  feel.mood = v; feel.chosen = false; var m = MOODS[v];
+  var hero = document.getElementById('mood-hero'); if (!hero) return;
+  hero.style.background = m.bg; document.getElementById('mood-fg').style.color = m.fg;
+  var s = document.getElementById('mood-svg'); s.innerHTML = PARTS.flames[v]; s.setAttribute('aria-label', m.label);
+  document.getElementById('mood-label').textContent = m.label;
+  document.getElementById('mood-result').innerHTML = '';
+  var inp = document.querySelector('[data-in="mood"]'); inp.setAttribute('aria-valuetext', m.label);
+}
+
+// ---------- لعبة الحفظ: ٤ مراحل ----------
+var LV = [
+  { n: 1, label: 'المرحلة ١', title: 'املا الفراغات', sub: 'دوس على الكلمة الناقصة', desc: 'دوس على الكلمات اللي تحت عشان تملا الفراغات بالترتيب.', color: '#6a4f9c', soft: '#e3dcf1' },
+  { n: 2, label: 'المرحلة ٢', title: 'ابني الآية', sub: 'رتّب الآية كلها', desc: 'الآية كلها فاضية. اختار الكلمات بالترتيب من تحت لحد ما تبنيها.', color: '#2f56a6', soft: '#dce4f4' },
+  { n: 3, label: 'المرحلة ٣', title: 'أول حرف', sub: 'تحدي إضافي · اكتب كلمة كلمة', desc: 'كل كلمة باينة بأول حرف بس. اكتب الكلمة الجاية.', color: '#6c8a35', soft: '#e3ecd0', practice: true, challenge: true },
+  { n: 4, label: 'المرحلة ٤', title: 'اكتبها كلها', sub: 'تحدي إضافي · من ذاكرتك، بإيدك أو بصوتك', desc: 'اكتب الآية كلها أو قولها بصوتك. لو جبت ٩٠٪ من الكلمات صح، عدّيت.', color: '#a5321c', soft: '#f6d6cb', practice: true, challenge: true }];
+var G = null;
+function gFresh() { return { screen: 'levels', level: 1, showPractice: true, right: 0, wrong: 0, pos: 0, flash: -1, helped: -1, tip: '', bad: false, typed: '', hint4: false, peek: false, result4: null, micMsg: '', listening: false }; }
+function verseNow() { var C = CONTENT[day().key]; return C && C.verse; }
+function scoreKey(n) { return day().key + ':' + n; }
+function gScores() { var o = {}; for (var i = 1; i <= 4; i++) { var v = store.scores[scoreKey(i)]; if (v !== undefined) o[i] = v; } return o; }
+function unlocked() { var s = gScores(), u = 1; while (s[u] !== undefined && u < 4) u++; return u; }
+function startGame() { G = gFresh(); go('game'); }
+function lcsHits(a, b) {
+  var m = a.length, n = b.length, dp = [], x, y;
+  for (x = 0; x <= m; x++) dp.push(new Array(n + 1).fill(0));
+  for (x = m - 1; x >= 0; x--) for (y = n - 1; y >= 0; y--) dp[x][y] = a[x] === b[y] ? dp[x + 1][y + 1] + 1 : Math.max(dp[x + 1][y], dp[x][y + 1]);
+  var hit = [], i = 0, j = 0;
+  while (i < m && j < n) { if (a[i] === b[j]) { hit.push(i); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
+  return hit;
+}
+function screenGame() {
+  var V = verseNow(); if (!V) { return screenHome(); }
+  if (!G) G = gFresh();
+  var L = LV[G.level - 1], W = V.words, T = W.map(norm), S = gScores();
+  if (G.screen === 'levels') {
+    var u = unlocked();
+    return '<div class="screen">' + header('احفظ الآية', V.ref) + '<main style="gap:14px"><p class="verse" style="font-size:19px;line-height:34px">' + W.join(' ') + '</p>' + LV.map(function (lv) {
+      var done = S[lv.n] !== undefined, open = lv.n <= u, cur = open && !done && lv.n === u;
+      return '<div style="border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;' + (cur ? 'background:' + lv.color + ';color:#fffaf0' : 'background:var(--page-raised);box-shadow:inset 0 0 0 1.5px var(--rule);' + (open ? '' : 'opacity:.6')) + '">' +
+        '<div style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;flex-shrink:0;border-radius:999px;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:18px;font-weight:700;color:var(--ink);background:var(--gold-soft);box-shadow:inset 0 0 0 2.5px var(--gold),0 0 0 1px var(--ink)">' + ar(lv.n) + '</span>' +
+        '<div style="flex:1"><b style="font-family:var(--display);font-size:17px">' + lv.title + '</b><br><span style="font-size:13px;opacity:.8">' + lv.sub + '</span></div><b style="font-size:13px">' + (done ? 'خلصت · ' + ar(S[lv.n]) + '٪' : open ? (lv.challenge ? 'تحدي' : '') : 'مقفولة') + '</b></div>' +
+        (open ? '<button data-act="gOpen" data-n="' + lv.n + '" style="min-height:44px;border:none;border-radius:999px;cursor:pointer;font-family:var(--display);font-size:16px;font-weight:700;' + (cur ? 'background:' + lv.soft + ';color:var(--ink)' : 'background:transparent;color:var(--lapis);box-shadow:inset 0 0 0 1.5px var(--rule)') + '">' + (done ? 'العب تاني' : 'العب') + '</button>' : '') + '</div>';
+    }).join('') + '</main>' + nav('') + '</div>';
+  }
+  if (G.screen === 'intro') {
+    return '<div class="screen" style="background:' + L.color + ';color:#fffaf0;align-items:center;justify-content:center;text-align:center;gap:10px;padding:88px 24px 32px;position:relative">' +
+      '<button data-act="gLevels" aria-label="رجوع للمراحل" style="position:absolute;top:24px;right:20px;width:40px;height:40px;border-radius:999px;border:none;background:rgba(255,250,240,.25);color:inherit;font-size:20px;cursor:pointer">×</button>' +
+      '<p style="margin:0;font-family:var(--display);font-size:18px;opacity:.8">' + L.label + '</p><h1 style="margin:0;font-family:var(--display);font-size:40px;line-height:54px">' + L.title + '</h1><p style="margin:0;font-size:15px;max-width:320px">' + L.desc + '</p>' +
+      (L.practice ? '<div style="width:100%;max-width:420px;text-align:start;background:var(--page-raised);color:var(--ink);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px"><p class="muted" style="margin:0;font-size:14px">تمرين: اقرا الآية بصوت عالي، وبعدين اخفيها وقولها من ذاكرتك.</p>' +
+        (G.showPractice ? '<p class="verse" style="font-size:19px;line-height:34px">' + W.join(' ') + ' <span class="muted" style="font-family:var(--body);font-size:13px">(' + V.ref + ')</span></p>' : '') +
+        '<button class="pill on" data-act="gPractice" style="align-self:flex-start">' + (G.showPractice ? 'اخفي الآية' : 'وريني الآية') + '</button></div>' : '') +
+      '<button data-act="gStart" style="margin-top:16px;min-height:52px;padding:0 44px;border-radius:999px;border:none;background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink);font-family:var(--display);font-size:17px;font-weight:700;cursor:pointer">يلا نبدأ</button></div>';
+  }
+  if (G.screen === 'complete') {
+    var sc = S[G.level] || 0;
+    var note = G.level === 1 ? 'فتحت المرحلة ٢: ابني الآية. خلّصها وتنوّر نجمة النهارده.' : G.level === 2 ? 'كده نجمة النهارده نوّرت.' : G.level === 3 ? 'فاضل آخر تحدي: اكتبها كلها.' : 'عدّيت المراحل الأربعة.';
+    return '<div class="screen" style="background:' + L.soft + ';align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px 24px">' +
+      '<span style="width:64px;height:64px;border-radius:999px;background:' + L.color + ';box-shadow:0 0 0 3px var(--gold);display:flex;align-items:center;justify-content:center">' + star(34, 'var(--gold)', 'var(--ink)') + '</span>' +
+      '<h1 style="margin:0;font-family:var(--display);font-size:30px;line-height:42px">خلصت ' + L.label + '</h1>' +
+      '<div role="img" aria-label="النتيجة ' + ar(sc) + '٪" style="position:relative;width:220px;height:130px"><svg viewBox="0 0 220 130" width="220" height="130" aria-hidden="true"><path d="M30 115 A80 80 0 0 1 190 115" fill="none" stroke="var(--rule)" stroke-width="14" stroke-linecap="round"></path><path d="M30 115 A80 80 0 0 1 190 115" fill="none" stroke="' + L.color + '" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="' + sc + ' 100"></path></svg>' +
+      '<div style="position:absolute;inset:auto 0 6px 0;display:flex;flex-direction:column;align-items:center;line-height:1.2"><span class="muted" style="font-size:14px">النتيجة</span><b dir="rtl" style="font-family:var(--display);font-size:32px;line-height:40px;unicode-bidi:isolate">' + ar(sc) + '٪</b></div></div>' +
+      '<p style="margin:0">' + note + '</p><button class="btn" data-act="gContinue" style="border-radius:999px;padding:0 40px">كمّل</button></div>';
+  }
+  if (G.screen === 'final') {
+    var all = S[4] !== undefined;
+    return '<div class="screen"><main style="align-items:center;text-align:center;gap:14px;padding-top:40px">' +
+      '<div class="rise" style="width:72px;height:72px;border-radius:999px;background:var(--gold-soft);box-shadow:inset 0 0 0 3px var(--gold),0 0 0 1.5px var(--ink);display:flex;align-items:center;justify-content:center">' + star(46, 'var(--gold)', 'var(--ink)') + '</div>' +
+      '<h1 style="margin:0;font-family:var(--display);font-size:24px;line-height:34px">' + (all ? 'خلصت التحدي كله' : 'نجمة النهارده نوّرت') + '</h1>' +
+      '<p class="muted" style="margin:0;font-size:14px">' + (all ? 'كتبت الآية من ذاكرتك. النجمة نوّرت من بعد المرحلة ٢.' : 'دي نجمتك رقم ' + ar(monthStars(day())) + ' في ' + day().coptic.monthName + '. عايز تثبّتها أكتر؟ جرّب التحدي.') + '</p>' +
+      '<div style="display:flex;gap:14px;align-items:center;width:100%">' +
+      '<figure aria-label="معاينة صورة الستوري" style="margin:0;width:140px;height:249px;flex-shrink:0;border-radius:12px;background:var(--lapis);padding:10px 12px;display:flex;flex-direction:column;align-items:center;gap:5px">' +
+      '<span class="ring" style="width:24px;height:24px;box-shadow:0 0 0 1.5px var(--gold)">' + lamp(24) + '</span>' +
+      '<div style="width:100%;flex:1;border-radius:999px 999px 6px 6px;background:var(--page);box-shadow:0 0 0 2px var(--ink),0 0 0 4px var(--gold);padding:24px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:4px"><b style="font-family:var(--display);font-size:10px;color:var(--cinnabar)">' + V.ref + '</b><span style="font-family:var(--scripture);font-size:9px;line-height:15px">' + W.join(' ') + '</span></div>' +
+      '<span style="font-size:8px;color:var(--gold-soft)">حفظت الآية دي مع</span>' + wordmark(46, 13, 'var(--gold-soft)') + '</figure>' +
+      '<div style="flex:1;display:flex;flex-direction:column;gap:10px"><button class="btn" data-act="share" style="background:var(--ink);color:var(--page-raised);border-radius:999px;font-size:16px">شارك ستوري</button>' +
+      '<button class="btn" data-act="nav" data-to="sky" style="background:none;color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink);border-radius:999px;font-size:16px">شوف سماك</button>' +
+      (all ? '' : '<button class="btn" data-act="gChallenge" style="background:var(--olive);border-radius:999px;font-size:15px">خد التحدي</button>') + '</div></div>' +
+      '<button data-act="gLevels" style="background:none;border:none;color:var(--lapis);font-weight:600;min-height:44px;cursor:pointer">المراحل</button></main>' + nav('') + storySheet() + '</div>';
+  }
+  // اللعب
+  var total = G.right + G.wrong, score = total ? Math.round(100 * G.right / total) : 0;
+  var h = '<div class="screen" style="background:' + L.soft + '">' +
+    '<div class="row" style="padding:24px 20px 0"><button data-act="gLevels" aria-label="رجوع للمراحل" style="width:40px;height:40px;border-radius:999px;border:none;background:rgba(43,29,20,.08);font-size:20px;cursor:pointer">×</button>' +
+    '<div style="display:flex;flex-direction:column;align-items:flex-end"><span class="muted" style="font-size:12px">النتيجة</span><b style="font-family:var(--display);font-size:22px;color:' + L.color + '">' + ar(score) + '٪</b></div></div>' +
+    '<div class="row" style="padding:8px 20px 0;align-items:baseline"><h1 style="margin:0;font-family:var(--display);font-size:24px">' + V.ref + '</h1><b class="muted" style="font-size:13px">' + L.label + ' · ' + L.title + '</b></div>';
+  if (G.level < 4) {
+    h += '<p style="margin:12px 20px 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 6px;font-family:var(--scripture);font-size:20px;line-height:34px">' + W.map(function (w, i) {
+      var filled = 'background:var(--page-raised);box-shadow:inset 0 0 0 1.5px ' + L.color;
+      var empty = function (now) { return 'min-width:' + Math.max(36, norm(w).length * 9) + 'px;background:rgba(255,250,240,.5);box-shadow:inset 0 0 0 ' + (now ? '2.5px var(--ink)' : '1.5px ' + L.color + '66'); };
+      if (G.level === 1) { var g = V.gaps.indexOf(i); if (g === -1) return '<span>' + w + '</span>'; return g < G.pos ? '<span class="slot" style="' + filled + '">' + w + '</span>' : '<span class="slot" style="' + empty(g === G.pos) + '"></span>'; }
+      if (G.level === 2) return i < G.pos ? '<span class="slot" style="' + filled + '">' + w + '</span>' : '<span class="slot" style="' + empty(i === G.pos) + '"></span>';
+      if (i < G.pos) return '<span class="slot" style="' + filled + '">' + w + '</span>';
+      return '<span class="slot" style="' + (i === G.pos ? 'box-shadow:inset 0 0 0 2.5px var(--ink);background:var(--page-raised)' : 'opacity:.55;color:var(--ink-muted)') + '">' + (i === G.helped ? w : norm(w).charAt(0) + 'ـــ') + '</span>';
+    }).join('') + '</p>';
+  } else {
+    var hits = lcsHits(T, norm(G.typed).split(' ').filter(Boolean));
+    h += '<div style="margin:12px 20px 0;display:flex;flex-direction:column;gap:10px">' +
+      (G.peek ? '<p class="verse" style="margin:0;background:var(--page-raised);border-radius:10px;padding:10px 14px;font-size:18px;line-height:32px">' + W.join(' ') + '</p>' : '') +
+      '<div id="g-letters" style="display:' + (G.hint4 ? 'flex' : 'none') + ';flex-wrap:wrap;gap:6px;font-family:var(--scripture);font-size:19px;line-height:28px">' + lettersHtml(W, hits) + '</div>' +
+      '<textarea id="g-typed" dir="rtl" rows="5" data-in="typed" aria-label="اكتب الآية كلها" placeholder="اكتب الآية من ذاكرتك، أو قولها بصوتك…" style="width:100%;resize:none;border:none;border-radius:14px;background:var(--page-raised);box-shadow:inset 0 0 0 2px ' + L.color + '55;padding:12px 14px;font-family:var(--scripture);font-size:20px;line-height:36px;color:var(--ink)">' + esc(G.typed) + '</textarea>' +
+      '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill' + (G.hint4 ? ' on' : '') + '" data-act="gHint4">أول حرف</button><button class="pill' + (G.peek ? ' on' : '') + '" data-act="gPeek">' + (G.peek ? 'اخفي الآية' : 'بُص بصّة') + '</button>' +
+      '<button class="pill" data-act="gMic" style="' + (G.listening ? 'background:var(--cinnabar);color:#fffaf0;box-shadow:none' : '') + '">' + (G.listening ? 'بيسمعك… دوس توقف' : 'قولها بصوتك') + '</button></div>' +
+      (G.micMsg ? '<p role="status" class="muted" style="margin:0;font-size:13px">' + G.micMsg + '</p>' : '') + '</div>';
+  }
+  var tip = G.tip || (G.level < 3 ? 'دوس على الكلمة اللي عليها الدور.' : G.level === 3 ? 'اكتب الكلمة الجاية في الآية.' : 'محتاج ٩٠٪ من الكلمات صح عشان تعدّي.');
+  h += '<p role="status" id="g-tip" style="margin:12px 20px 0;font-size:14px;font-weight:600;color:' + (G.bad ? 'var(--cinnabar)' : 'var(--ink-muted)') + '">' + tip + '</p>';
+  h += '<div style="margin-top:auto;background:' + L.color + ';border-radius:24px 24px 0 0;padding:18px 20px calc(24px + var(--safe-bottom));display:flex;flex-direction:column;gap:14px">';
+  if (G.level < 3) {
+    var need = G.level === 1 ? V.gaps[G.pos] : G.pos;
+    var idx = G.level === 1 ? V.gaps.slice().sort(function (a, b) { return (a * 7) % 11 - (b * 7) % 11; }) : W.map(function (_, i) { return i; }).sort(function (a, b) { return ((a * 7 + 3) % 17) - ((b * 7 + 3) % 17); });
+    h += '<div style="display:flex;flex-wrap:wrap;gap:8px">' + idx.map(function (i) {
+      var used = G.level === 1 ? V.gaps.indexOf(i) < G.pos : i < G.pos;
+      if (used) return '';
+      var st = G.flash === i ? 'background:var(--cinnabar);color:#fffaf0' : G.helped === i ? 'background:var(--gold-soft);box-shadow:0 0 0 3px var(--gold)' : 'background:' + L.soft;
+      return '<button class="chip" data-act="gPick" data-i="' + i + '" style="' + st + '">' + W[i] + '</button>';
+    }).join('') + '</div>';
+  }
+  if (G.level === 3) h += '<div style="display:flex;gap:8px"><input id="g-word" type="text" dir="rtl" autocomplete="off" autocapitalize="off" data-in="word3" aria-label="اكتب الكلمة الجاية" placeholder="اكتب الكلمة الجاية" style="flex:1;min-width:0;height:48px;border:none;border-radius:12px;padding:0 14px;background:var(--page-raised);box-shadow:inset 0 0 0 2px ' + (G.bad ? 'var(--cinnabar)' : 'var(--rule)') + ';font-family:var(--scripture);font-size:20px;color:var(--ink)"><button data-act="gSubmit3" aria-label="ابعت" style="width:48px;height:48px;flex-shrink:0;border:none;border-radius:999px;background:var(--gold-soft);box-shadow:0 0 0 2px var(--ink);font-size:20px;font-weight:700;cursor:pointer">←</button></div>';
+  h += '<div class="row"><button data-act="gHelp" style="min-height:44px;padding:0 18px;border:none;border-radius:999px;background:rgba(255,250,240,.18);color:#fffaf0;box-shadow:inset 0 0 0 1.5px rgba(255,250,240,.5);font-weight:700;cursor:pointer">' + (G.level === 4 ? 'مساعدة: أول حرف' : 'ساعدني') + '</button>' +
+    (G.level === 4 ? '<button data-act="gCheck4" style="min-height:48px;padding:0 32px;border:none;border-radius:999px;background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink);font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer">اتأكد</button>' : '') + '</div></div>';
+  if (G.result4 !== null) {
+    var hits4 = lcsHits(T, norm(G.typed).split(' ').filter(Boolean));
+    h += '<div class="sheet-wrap" style="background:rgba(43,29,20,.35)"><div role="status" style="background:var(--cinnabar);color:#fffaf0;border-radius:24px 24px 0 0;padding:24px 20px calc(28px + var(--safe-bottom));display:flex;flex-direction:column;gap:12px">' +
+      '<b style="font-family:var(--display);font-size:24px">لسه شوية. جبت ' + ar(G.result4) + '٪</b><p style="margin:0;font-family:var(--scripture);font-size:18px;line-height:32px">' + W.map(function (w, i) { return hits4.indexOf(i) !== -1 ? w : '<u style="text-decoration-thickness:2px;text-underline-offset:6px;color:var(--gold-soft);font-weight:700">' + w + '</u>'; }).join(' ') + '</p>' +
+      '<p style="margin:0;font-size:13px;opacity:.85">الكلمات اللي تحتها خط هي اللي فاتتك. محتاج ٩٠٪ عشان تعدّي.</p><button data-act="gRetry" style="min-height:48px;border:none;border-radius:999px;background:var(--gold-soft);color:var(--ink);font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer">جرّب تاني</button></div></div>';
+  }
+  return h + '</div>';
+}
+function storySheet() {
+  if (!ui.story) return '';
+  return '<div class="sheet-wrap" data-act="closeStory"><section class="sheet" role="dialog" aria-modal="true" aria-label="صورة الستوري" data-stop="1" style="align-items:center;text-align:center">' +
+    '<span class="grab" aria-hidden="true"></span><img src="' + ui.story + '" alt="صورة ستوري بالآية" style="width:min(240px,60vw);border-radius:12px;box-shadow:0 8px 20px -10px rgba(43,29,20,.6)">' +
+    '<p style="margin:0;font-size:15px;line-height:24px">دوس «شارك الصورة»، واختار إنستجرام أو «حفظ الصورة».</p>' +
+    '<button class="btn" data-act="saveStory" style="width:100%;background:var(--ink);color:var(--page-raised);border-radius:999px">شارك الصورة</button>' +
+    '<button class="btn" data-act="closeStory" style="width:100%;background:none;color:var(--lapis)">اقفل</button></section></div>';
+}
+function lettersHtml(W, hits) {
+  return W.map(function (w, i) { var ok = hits.indexOf(i) !== -1; return '<span style="min-width:30px;text-align:center;padding:0 6px;border-radius:6px;' + (ok ? 'background:var(--olive-soft);color:var(--olive)' : 'background:var(--gold-soft)') + '">' + norm(w).charAt(0) + 'ـ</span>'; }).join('');
+}
+function finishLevel(sc) {
+  store.scores[scoreKey(G.level)] = sc;
+  if (G.level >= 2) store.stars[day().key] = true;   // النجمة بتنوّر بعد المرحلة ٢
+  save(); G.screen = 'complete'; G.tip = ''; render();
+}
+function accept3(val) {
+  var V = verseNow(), T = V.words.map(norm);
+  if (norm(val) !== T[G.pos]) return false;
+  G.pos++; G.right++; G.helped = -1; G.tip = 'اكتب الكلمة الجاية.'; G.bad = false;
+  if (G.pos >= T.length) finishLevel(Math.round(100 * G.right / (G.right + G.wrong)));
+  else { render(); var i = document.getElementById('g-word'); if (i) i.focus(); }
+  return true;
+}
+var rec = null;
+function stopMic() { if (rec) { try { rec.stop(); } catch (e) {} } G && (G.listening = false); }
+
+// ---------- صورة الستوري ----------
+function shareStory() {
+  var V = verseNow(); if (!V) return;
+  function lines(x, text, max) { var out = [], cur = ''; text.split(' ').forEach(function (w) { var t = cur ? cur + ' ' + w : w; if (x.measureText(t).width > max && cur) { out.push(cur); cur = w; } else cur = t; }); if (cur) out.push(cur); return out; }
+  function paint(lampImg) {
+    var c = document.createElement('canvas'); c.width = 1080; c.height = 1920; var x = c.getContext('2d');
+    x.fillStyle = '#1f3a75'; x.fillRect(0, 0, 1080, 1920);
+    x.strokeStyle = 'rgba(212,149,42,0.16)'; x.lineWidth = 4; x.lineCap = 'round';
+    for (var gx = 36; gx < 1080; gx += 84) for (var gy = 36; gy < 1920; gy += 84) { x.beginPath(); x.moveTo(gx, gy - 14); x.lineTo(gx, gy + 14); x.moveTo(gx - 14, gy); x.lineTo(gx + 14, gy); x.stroke(); }
+    if (lampImg) { x.beginPath(); x.arc(540, 175, 104, 0, Math.PI * 2); x.lineWidth = 8; x.strokeStyle = '#d4952a'; x.stroke(); x.drawImage(lampImg, 444, 79, 192, 192); }
+    function arch() { x.beginPath(); x.moveTo(110, 760); x.arc(540, 760, 430, Math.PI, 0); x.lineTo(970, 1480); x.lineTo(110, 1480); x.closePath(); }
+    arch(); x.fillStyle = '#f5ecdc'; x.fill(); x.lineWidth = 26; x.strokeStyle = '#d4952a'; x.stroke(); arch(); x.lineWidth = 8; x.strokeStyle = '#2b1d14'; x.stroke();
+    x.save(); x.translate(540, 470); x.scale(70, 70); x.fillStyle = '#d4952a'; x.fill(new Path2D(STAR_D)); x.lineWidth = 0.06; x.strokeStyle = '#2b1d14'; x.stroke(new Path2D(STAR_D)); x.restore();
+    x.direction = 'rtl'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.fillStyle = '#a5321c'; x.font = '700 64px "Reem Kufi", Tahoma, sans-serif'; x.fillText(V.ref, 540, 640);
+    x.fillStyle = '#2b1d14'; x.font = '60px "Amiri", serif';
+    lines(x, V.words.join(' '), 720).forEach(function (l, k) { x.fillText(l, 540, 780 + k * 112); });
+    x.fillStyle = '#f6e2b5'; x.font = '700 44px "IBM Plex Sans Arabic", Tahoma, sans-serif'; x.fillText('حفظت الآية دي مع', 540, 1586);
+    var sc = 320 / 3129; x.save(); x.translate(540 - 160 - 42 * sc, 1640 + 723 * sc); x.scale(sc, sc); x.fillStyle = '#f6e2b5'; x.fill(new Path2D(PARTS.wordmark)); x.restore();
+    x.fillStyle = 'rgba(255,250,240,0.8)'; x.font = '36px "IBM Plex Sans Arabic", Tahoma, sans-serif'; x.fillText('سراج · نور لجيل جديد', 540, 1800);
+    ui.story = c.toDataURL('image/png');
+    c.toBlob(function (b) { ui.storyBlob = b; }, 'image/png');
+    render();
+  }
+  var img = new Image();
+  img.onload = function () { paint(img); }; img.onerror = function () { paint(null); };
+  var fontsReady = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('60px "Amiri"'), document.fonts.load('700 64px "Reem Kufi"'), document.fonts.load('700 44px "IBM Plex Sans Arabic"')]) : Promise.resolve();
+  fontsReady.then(function () { img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="360" height="360">' + PARTS.lamp + '</svg>'); }, function () { paint(null); });
+}
+
+// ---------- الرسم والأحداث ----------
+function render() {
+  var map = { home: screenHome, readings: screenReadings, saint: screenSaint, agpeya: screenAgpeya, sky: screenSky, feeling: screenFeeling, game: screenGame };
+  var fn = map[route] || screenHome;
+  if (route === 'game' && !verseNow()) fn = screenHome;
+  app.innerHTML = fn();
+  document.documentElement.style.background = route === 'sky' ? '#121726' : '';
+}
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-act]'); if (!el) return;
+  if (el.classList.contains('sheet-wrap') && e.target.closest('[data-stop]')) return;
+  var a = el.getAttribute('data-act'), V = verseNow();
+  switch (a) {
+    case 'nav': go(el.getAttribute('data-to')); break;
+    case 'soon': toast('جاية في نسخة قريبة.'); break;
+    case 'demo': store.demo = DEMO_DATE; save(); G = null; go('home'); render(); break;
+    case 'real': store.demo = null; save(); G = null; render(); break;
+    case 'hideInstall': store.installHidden = true; save(); render(); break;
+    case 'info': ui.info = true; render(); break;
+    case 'closeInfo': ui.info = false; render(); break;
+    case 'game': startGame(); break;
+    case 'chooseMood': feel.chosen = true; document.getElementById('mood-result').innerHTML = moodResult(); break;
+    case 'gOpen': G.level = +el.getAttribute('data-n'); G.screen = 'intro'; G.showPractice = true; render(); break;
+    case 'gLevels': stopMic(); G.screen = 'levels'; render(); break;
+    case 'gPractice': G.showPractice = !G.showPractice; render(); break;
+    case 'gStart': Object.assign(G, { screen: 'play', right: 0, wrong: 0, pos: 0, flash: -1, helped: -1, tip: '', bad: false, typed: '', hint4: false, peek: false, result4: null, micMsg: '' }); render(); break;
+    case 'gPick': {
+      var i = +el.getAttribute('data-i'), need = G.level === 1 ? V.gaps[G.pos] : G.pos;
+      if (norm(V.words[i]) === norm(V.words[need])) {
+        G.pos++; G.right++; G.flash = -1; G.helped = -1; G.tip = ''; G.bad = false;
+        var end = G.level === 1 ? G.pos >= V.gaps.length : G.pos >= V.words.length;
+        if (end) finishLevel(Math.round(100 * G.right / (G.right + G.wrong))); else render();
+      } else { G.wrong++; G.flash = i; G.tip = 'مش دي. بص على الكلمة اللي قبل الفراغ وجرّب تاني.'; G.bad = true; render(); }
+      break;
+    }
+    case 'gSubmit3': {
+      var inp = document.getElementById('g-word'), val = inp ? inp.value : '';
+      if (!norm(val) || accept3(val)) break;
+      G.wrong++; G.tip = 'مش هي. الكلمة دي بتبدأ بحرف «' + norm(V.words[G.pos]).charAt(0) + '».'; G.bad = true; render();
+      var i2 = document.getElementById('g-word'); if (i2) { i2.value = val; i2.focus(); }
+      break;
+    }
+    case 'gHelp':
+      if (G.level < 3) { G.helped = G.level === 1 ? V.gaps[G.pos] : G.pos; G.wrong++; G.tip = 'دي الكلمة اللي عليها الدور، منوّرة تحت.'; G.bad = false; }
+      else if (G.level === 3) { G.helped = G.pos; G.wrong++; G.tip = 'الكلمة باينة فوق. اكتبها عشان تكمّل.'; G.bad = false; }
+      else { G.hint4 = true; G.tip = 'ظهرلك أول حرف من كل كلمة. الأخضر هو اللي كتبته صح.'; G.bad = false; }
+      render(); break;
+    case 'gHint4': G.hint4 = !G.hint4; render(); break;
+    case 'gPeek': if (!G.peek) G.wrong++; G.peek = !G.peek; render(); break;
+    case 'gMic': {
+      if (G.listening) { stopMic(); render(); break; }
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { G.micMsg = 'المتصفح ده مش بيدعم الكتابة بالصوت. جرّب كروم، أو استخدم ميكروفون الكيبورد.'; render(); break; }
+      try {
+        rec = new SR(); rec.lang = 'ar-EG'; rec.interimResults = true; rec.continuous = true;
+        var before = G.typed ? G.typed + ' ' : '';
+        rec.onresult = function (ev) { var t = ''; for (var k = 0; k < ev.results.length; k++) t += ev.results[k][0].transcript; G.typed = before + t; var ta = document.getElementById('g-typed'); if (ta) ta.value = G.typed; refreshLetters(); };
+        rec.onerror = function () { G.listening = false; G.micMsg = 'مقدرتش أسمعك. جرّب تاني، أو اكتبها بإيدك.'; render(); };
+        rec.onend = function () { G.listening = false; render(); };
+        rec.start(); G.listening = true; G.micMsg = ''; render();
+      } catch (err) { G.micMsg = 'الميكروفون مش متاح. اكتبها بإيدك.'; render(); }
+      break;
+    }
+    case 'gCheck4': {
+      var T = V.words.map(norm), typed = norm(G.typed).split(' ').filter(Boolean);
+      if (!typed.length) { G.tip = 'اكتب الآية الأول، أو دوس على الميكروفون وقولها.'; G.bad = true; render(); break; }
+      stopMic();
+      var pct = Math.round(100 * lcsHits(T, typed).length / T.length);
+      if (pct >= 90) finishLevel(pct); else { G.result4 = pct; G.wrong++; render(); }
+      break;
+    }
+    case 'gRetry': G.result4 = null; G.hint4 = true; render(); break;
+    case 'gContinue': if (G.level === 2 || G.level === 4) G.screen = 'final'; else { G.level++; G.screen = 'intro'; G.showPractice = true; } render(); break;
+    case 'gChallenge': { var s = gScores(); G.level = s[3] !== undefined ? 4 : 3; G.screen = 'intro'; G.showPractice = true; render(); break; }
+    case 'share': shareStory(); break;
+    case 'closeStory': ui.story = null; render(); break;
+    case 'saveStory': {
+      var blob = ui.storyBlob;
+      if (!blob) { toast('ثانية واحدة، الصورة لسه بتتجهز.'); break; }
+      var file = new File([blob], 'siou-verse.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) { navigator.share({ files: [file] }).catch(function () {}); break; }
+      var link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'siou-verse.png';
+      document.body.appendChild(link); link.click(); link.remove(); toast('الصورة اتحفظت.');
+      break;
+    }
+  }
+});
+function refreshLetters() {
+  var V = verseNow(), box = document.getElementById('g-letters'); if (!V || !box) return;
+  box.innerHTML = lettersHtml(V.words, lcsHits(V.words.map(norm), norm(G.typed).split(' ').filter(Boolean)));
+}
+document.addEventListener('input', function (e) {
+  var k = e.target.getAttribute('data-in');
+  if (k === 'mood') updateMood(+e.target.value);
+  else if (k === 'word3') accept3(e.target.value);
+  else if (k === 'typed') { G.typed = e.target.value; if (G.bad) { G.bad = false; var t = document.getElementById('g-tip'); if (t) { t.style.color = 'var(--ink-muted)'; } } refreshLetters(); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-in') === 'word3') { e.preventDefault(); var b = document.querySelector('[data-act="gSubmit3"]'); if (b) b.click(); }
+  if (e.key === 'Escape' && ui.info) { ui.info = false; render(); }
+});
+render();
+})();
