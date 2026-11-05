@@ -30,11 +30,16 @@ try { var saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved) st
 function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 
 // ---------- التاريخ ----------
-var DEMO_DATE = [2026, 11, 15];   // الحد ٦ هاتور ١٧٤٣: اليوم اللي محتواه كامل
-function appDate() {
-  if (store.demo) return store.demo;
-  var n = new Date(); return [n.getFullYear(), n.getMonth() + 1, n.getDate()];
-}
+var DEMO_DATE = [2026, 11, 10];   // ١ هاتور ١٧٤٣: أول يوم في الشهر اللي اتراجع
+var picked = null;   // يوم اختاره المستخدم. مش بيتحفظ، فأول ما يفتح التطبيق تاني يرجع للنهارده
+store.demo = null;
+function todayDate() { var n = new Date(); return [n.getFullYear(), n.getMonth() + 1, n.getDate()]; }
+function appDate() { return picked || todayDate(); }
+function dayNum(d) { return Math.round(Date.UTC(d[0], d[1] - 1, d[2]) / 864e5); }
+function isFuture() { return dayNum(appDate()) > dayNum(todayDate()); }
+function shiftDate(d, n) { var t = new Date(Date.UTC(d[0], d[1] - 1, d[2] + n)); return [t.getUTCFullYear(), t.getUTCMonth() + 1, t.getUTCDate()]; }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function setPicked(d) { picked = d && dayNum(d) !== dayNum(todayDate()) ? d : null; G = null; ui.picker = false; }
 function day() {
   var d = appDate(), r = E.readingsFor(d[0], d[1], d[2]);
   r.key = r.coptic.year + '-' + r.coptic.month + '-' + r.coptic.day;
@@ -101,7 +106,7 @@ function occasion(r) {
 
 // ---------- الراوتر ----------
 var route = (location.hash || '#home').slice(1);
-var ui = { info: false, story: null, storyBlob: null };
+var ui = { info: false, story: null, storyBlob: null, picker: false };
 window.addEventListener('hashchange', function () { if (rec) stopMic(); route = (location.hash || '#home').slice(1); ui.info = false; render(); window.scrollTo(0, 0); });
 function go(r) { if (('#' + r) === location.hash) render(); else location.hash = r; }
 var app = document.getElementById('app');
@@ -127,9 +132,26 @@ function nav(cur) {
 function monthStars(r) {
   var n = 0; for (var d = 1; d <= 30; d++) if (store.stars[r.coptic.year + '-' + r.coptic.month + '-' + d]) n++; return n;
 }
-function demoBar(r) {
-  if (!store.demo) return '';
-  return '<div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>بتجرّب يوم ' + gLabel(r) + '</span><button class="pill" data-act="real">ارجع للنهارده</button></div>';
+function chev(dir) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir > 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>'; }
+// على الرئيسية الشريط ظاهر دايمًا، وفي باقي الشاشات بيظهر بس لو فيه يوم متختار
+function demoBar(r, always) {
+  if (!picked && !always) return '';
+  var arrow = 'width:44px;height:44px;padding:0;justify-content:center;flex-shrink:0';
+  return '<div style="display:flex;align-items:center;gap:8px">' +
+    '<button class="pill" data-act="dayShift" data-n="-1" aria-label="اليوم اللي قبله" style="' + arrow + '">' + chev(-1) + '</button>' +
+    '<button class="pill' + (picked ? ' on' : '') + '" data-act="pickOpen" aria-haspopup="dialog" style="flex:1;justify-content:center;min-height:44px">' + icon('calendar', 18) + (picked ? gLabel(r) : 'اختار يوم') + '</button>' +
+    '<button class="pill" data-act="dayShift" data-n="1" aria-label="اليوم اللي بعده" style="' + arrow + '">' + chev(1) + '</button></div>' +
+    (picked ? '<div class="note" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 16px"><span>بتشوف ' + cLabel(r) + (isFuture() ? '. ده يوم جاي، فالنجمة مش هتنوّر غير في يومها.' : '') + '</span><button class="pill" data-act="real" style="flex-shrink:0">ارجع للنهارده</button></div>' : '');
+}
+function pickerSheet() {
+  if (!ui.picker) return '';
+  var d = appDate(), v = d[0] + '-' + pad(d[1]) + '-' + pad(d[2]);
+  return '<div class="sheet-wrap" data-act="pickClose"><section class="sheet" role="dialog" aria-modal="true" aria-labelledby="pick-t" data-stop="1">' +
+    '<span class="grab" aria-hidden="true"></span><h2 id="pick-t">اختار يوم</h2>' +
+    '<p class="muted" style="margin:0;font-size:14px;line-height:22px">هتشوف قراءات اليوم ده وآيته وسنكساره. القطمارس المراجَع لحد دلوقتي هو شهر هاتور (١٠ نوفمبر – ٩ ديسمبر).</p>' +
+    '<input id="pick-date" type="date" value="' + v + '" aria-label="التاريخ" style="width:100%;min-height:52px;border:none;border-radius:12px;padding:0 14px;background:var(--page);box-shadow:inset 0 0 0 2px var(--rule);font:inherit;font-size:17px;color:var(--ink)">' +
+    '<button class="btn" data-act="pickGo">روح لليوم ده</button>' +
+    (picked ? '<button class="btn" data-act="real" style="background:none;color:var(--lapis)">ارجع للنهارده</button>' : '') + '</section></div>';
 }
 function infoSheet(r) {
   var o = occasion(r); if (!ui.info || !o.img) return '';
@@ -163,11 +185,11 @@ function screenHome() {
     '<span dir="ltr" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">' + wordmark(104, 30) +
     '<span style="font-family:Marcellus,Georgia,serif;font-size:11.5px;line-height:14px;letter-spacing:.18em;opacity:.85">SIOU · <span style="font-family:var(--body);letter-spacing:0">نجمة</span></span></span></button>' +
     '<button data-act="nav" data-to="sky" aria-label="' + ar(monthStars(r)) + ' نجوم في ' + r.coptic.monthName + '" style="position:relative;background:none;border:none;color:var(--on-lapis);min-height:44px;display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:18px;font-weight:700;cursor:pointer">' + star(18) + ar(monthStars(r)) + '</button></header>';
-  var h = '<div class="screen">' + hdr + '<main>' + demoBar(r) + seasonCard(r);
+  var h = '<div class="screen">' + hdr + '<main>' + seasonCard(r) + demoBar(r, true);
   if (r.status === 'missing') {
     h += '<div class="card-soft" style="display:flex;flex-direction:column;gap:12px"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2>' +
       '<p style="margin:0;font-size:15px;line-height:26px">القطمارس اللي اتراجع لحد دلوقتي هو شهر هاتور، وبيبدأ الاتنين ١٠ نوفمبر. لحد ما ييجي، جرّب يوم كامل من هاتور.</p>' +
-      '<button class="btn" data-act="demo">جرّب يوم الحد ١٥ نوفمبر (٦ هاتور)</button></div>';
+      '<button class="btn" data-act="demo">روح لأول يوم في هاتور</button></div>';
   } else if (C) {
     var w = C.verse.words.join(' ');
     h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>آية اليوم</h2><article class="card" style="display:flex;flex-direction:column;gap:12px">' +
@@ -192,7 +214,7 @@ function screenHome() {
   h += '<section class="card-soft" style="display:flex;flex-direction:column;gap:16px"><div class="row"><h2>نجمتك</h2><span class="muted" style="font-size:13px"><b style="font-family:var(--display);font-size:18px;color:var(--ink)">' + ar(monthStars(r)) + '</b> نجوم في ' + r.coptic.monthName + '</span></div>' +
     '<div class="week">' + dots + '</div>' +
     (C ? (lit ? '<button class="btn" data-act="nav" data-to="sky" style="background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink)">' + star(20, 'var(--gold)', 'var(--ink)') + 'نجمة النهارده منوّرة. شوف سماك</button>'
-      : '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + 'احفظ الآية ونوّر نجمة النهارده</button>')
+      : '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + (isFuture() ? 'اتمرّن على آية اليوم ده' : picked ? 'احفظ الآية ونوّر نجمة اليوم ده' : 'احفظ الآية ونوّر نجمة النهارده') + '</button>')
       : '<p class="muted" style="margin:0;font-size:14px">النجمة بتنوّر لما تحفظ آية اليوم. الأيام اللي فيها آية هتظهر هنا.</p>') + '</section>';
   // المكتبة
   var tiles = [['readings', 'القطمارس', icon('calendar', 28)], ['agpeya', 'الأجبية', icon('prayer-book', 28)], ['saint', 'السنكسار', icon('saint', 28)],
@@ -202,7 +224,7 @@ function screenHome() {
   }).join('') + '</div></section>';
   var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
   if (!store.installHidden && !standalone) h += '<div class="note" style="display:flex;flex-direction:column;gap:8px"><b style="font-family:var(--display)">ثبّت سيو على موبايلك</b><span>آيفون: من سفاري دوس زرار المشاركة واختار «إضافة إلى الشاشة الرئيسية». أندرويد: من قايمة كروم اختار «تثبيت التطبيق».</span><button class="pill" data-act="hideInstall" style="align-self:flex-start">تمام</button></div>';
-  h += '</main>' + nav('home') + infoSheet(r) + '</div>';
+  h += '</main>' + nav('home') + infoSheet(r) + pickerSheet() + '</div>';
   return h;
 }
 
@@ -210,7 +232,7 @@ function screenHome() {
 function screenReadings() {
   var r = day(), C = CONTENT[r.key];
   var h = '<div class="screen">' + header('قراءات اليوم', r.status !== 'missing' && r.weekday === 0 ? r.title + ' · ' + cLabel(r) : cLabel(r)) + '<main>' + demoBar(r);
-  if (r.status === 'missing') return h + '<div class="card-soft"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2><p>جرّب يوم من هاتور لحد ما الشهر ده يتراجع.</p><button class="btn" data-act="demo">جرّب يوم الحد ١٥ نوفمبر</button></div></main>' + nav('') + '</div>';
+  if (r.status === 'missing') return h + '<div class="card-soft"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2><p>جرّب يوم من هاتور لحد ما الشهر ده يتراجع.</p><button class="btn" data-act="demo">روح لأول يوم في هاتور</button></div></main>' + nav('') + '</div>';
   if (C && C.reflection) {
     h += '<section style="text-align:center;display:flex;flex-direction:column;gap:4px"><h1 style="margin:0;font-family:var(--display);font-size:32px;line-height:46px;color:var(--lapis)">' + C.theme + '</h1>' + (C.gospel ? '<p class="muted" style="margin:0;font-size:14px">إنجيل القداس · ' + C.gospel + '</p>' : C.from ? '<p class="muted" style="margin:0;font-size:14px">من ' + C.from + '</p>' : '') + '</section>' +
       '<section style="display:flex;flex-direction:column;gap:12px">' + (C.opening ? '<p class="muted" style="margin:0;font-size:14px;line-height:24px;text-align:center">' + C.opening + '</p>' : '') +
@@ -482,7 +504,7 @@ function lettersHtml(W, hits) {
 }
 function finishLevel(sc) {
   store.scores[scoreKey(G.level)] = sc;
-  if (G.level >= 2) store.stars[day().key] = true;   // النجمة بتنوّر بعد المرحلة ٢
+  if (G.level >= 2 && !isFuture()) store.stars[day().key] = true;   // النجمة بتنوّر بعد المرحلة ٢، ومش بتنوّر في يوم لسه ماجاش
   save(); G.screen = 'complete'; G.tip = ''; render();
 }
 function accept3(val) {
@@ -542,8 +564,12 @@ document.addEventListener('click', function (e) {
   switch (a) {
     case 'nav': go(el.getAttribute('data-to')); break;
     case 'soon': toast('جاية في نسخة قريبة.'); break;
-    case 'demo': store.demo = DEMO_DATE; save(); G = null; go('home'); render(); break;
-    case 'real': store.demo = null; save(); G = null; render(); break;
+    case 'demo': setPicked(DEMO_DATE); go('home'); render(); break;
+    case 'real': setPicked(null); render(); break;
+    case 'dayShift': setPicked(shiftDate(appDate(), +el.getAttribute('data-n'))); render(); break;
+    case 'pickOpen': ui.picker = true; render(); var pd = document.getElementById('pick-date'); if (pd) pd.focus(); break;
+    case 'pickClose': ui.picker = false; render(); break;
+    case 'pickGo': { var pv = (document.getElementById('pick-date') || {}).value; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(pv || ''); if (!m) { toast('اختار تاريخ الأول.'); break; } setPicked([+m[1], +m[2], +m[3]]); render(); window.scrollTo(0, 0); break; }
     case 'hideInstall': store.installHidden = true; save(); render(); break;
     case 'info': ui.info = true; render(); break;
     case 'closeInfo': ui.info = false; render(); break;
@@ -645,7 +671,7 @@ document.addEventListener('input', function (e) {
 });
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-in') === 'word3') { e.preventDefault(); var b = document.querySelector('[data-act="gSubmit3"]'); if (b) b.click(); }
-  if (e.key === 'Escape' && ui.info) { ui.info = false; render(); }
+  if (e.key === 'Escape' && (ui.info || ui.picker)) { ui.info = false; ui.picker = false; render(); }
 });
 render();
 })();

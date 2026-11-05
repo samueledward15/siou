@@ -1,5 +1,5 @@
 // Siou · شغل من غير إنترنت: بنخزّن ملفات التطبيق أول مرة، وبعدها بنفتح من التخزين ونحدّث في الخلفية
-const CACHE = 'siou-v5';
+const CACHE = 'siou-v6';
 const FILES = ["./", "index.html", "app.js", "engine.js", "manifest.webmanifest", "icon-192.png", "icon-512.png", "img/virgin-tapestry.jpg", "img/mena.jpg", "img/codex-cross.jpg", "img/saint-ostracon.jpg", "img/three-saints.jpg", "img/lamp.jpg"];
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
