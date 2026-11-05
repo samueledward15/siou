@@ -102,7 +102,7 @@ function occasion(r) {
 // ---------- الراوتر ----------
 var route = (location.hash || '#home').slice(1);
 var ui = { info: false, story: null, storyBlob: null };
-window.addEventListener('hashchange', function () { route = (location.hash || '#home').slice(1); ui.info = false; render(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', function () { if (rec) stopMic(); route = (location.hash || '#home').slice(1); ui.info = false; render(); window.scrollTo(0, 0); });
 function go(r) { if (('#' + r) === location.hash) render(); else location.hash = r; }
 var app = document.getElementById('app');
 function toast(msg) {
@@ -358,6 +358,11 @@ function scoreKey(n) { return day().key + ':' + n; }
 function gScores() { var o = {}; for (var i = 1; i <= 4; i++) { var v = store.scores[scoreKey(i)]; if (v !== undefined) o[i] = v; } return o; }
 function unlocked() { var s = gScores(), u = 1; while (s[u] !== undefined && u < 4) u++; return u; }
 function startGame() { G = gFresh(); go('game'); }
+function tokens(s) {
+  var a = norm(s).split(' ').filter(Boolean), out = [];
+  for (var i = 0; i < a.length; i++) { if (a[i] === 'و' && i + 1 < a.length) { out.push('و' + a[i + 1]); i++; } else out.push(a[i]); }
+  return out;
+}
 function lcsHits(a, b) {
   var m = a.length, n = b.length, dp = [], x, y;
   for (x = 0; x <= m; x++) dp.push(new Array(n + 1).fill(0));
@@ -431,13 +436,13 @@ function screenGame() {
       return '<span class="slot" style="' + (i === G.pos ? 'box-shadow:inset 0 0 0 2.5px var(--ink);background:var(--page-raised)' : 'opacity:.55;color:var(--ink-muted)') + '">' + (i === G.helped ? w : norm(w).charAt(0) + 'ـــ') + '</span>';
     }).join('') + '</p>';
   } else {
-    var hits = lcsHits(T, norm(G.typed).split(' ').filter(Boolean));
+    var hits = lcsHits(T, tokens(G.typed));
     h += '<div style="margin:12px 20px 0;display:flex;flex-direction:column;gap:10px">' +
       (G.peek ? '<p class="verse" style="margin:0;background:var(--page-raised);border-radius:10px;padding:10px 14px;font-size:18px;line-height:32px">' + W.join(' ') + '</p>' : '') +
       '<div id="g-letters" style="display:' + (G.hint4 ? 'flex' : 'none') + ';flex-wrap:wrap;gap:6px;font-family:var(--scripture);font-size:19px;line-height:28px">' + lettersHtml(W, hits) + '</div>' +
       '<textarea id="g-typed" dir="rtl" rows="5" data-in="typed" aria-label="اكتب الآية كلها" placeholder="اكتب الآية من ذاكرتك، أو قولها بصوتك…" style="width:100%;resize:none;border:none;border-radius:14px;background:var(--page-raised);box-shadow:inset 0 0 0 2px ' + L.color + '55;padding:12px 14px;font-family:var(--scripture);font-size:20px;line-height:36px;color:var(--ink)">' + esc(G.typed) + '</textarea>' +
       '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pill' + (G.hint4 ? ' on' : '') + '" data-act="gHint4">أول حرف</button><button class="pill' + (G.peek ? ' on' : '') + '" data-act="gPeek">' + (G.peek ? 'اخفي الآية' : 'بُص بصّة') + '</button>' +
-      '<button class="pill" data-act="gMic" style="' + (G.listening ? 'background:var(--cinnabar);color:#fffaf0;box-shadow:none' : '') + '">' + (G.listening ? 'بيسمعك… دوس توقف' : 'قولها بصوتك') + '</button></div>' +
+      (G.micOff ? '' : '<button class="pill" data-act="gMic" style="' + (G.listening ? 'background:var(--cinnabar);color:#fffaf0;box-shadow:none' : '') + '">' + (G.listening ? 'بيسمعك… دوس توقف' : 'قولها بصوتك') + '</button>') + '</div>' +
       (G.micMsg ? '<p role="status" class="muted" style="margin:0;font-size:13px">' + G.micMsg + '</p>' : '') + '</div>';
   }
   var tip = G.tip || (G.level < 3 ? 'دوس على الكلمة اللي عليها الدور.' : G.level === 3 ? 'اكتب الكلمة الجاية في الآية.' : 'محتاج ٩٠٪ من الكلمات صح عشان تعدّي.');
@@ -457,7 +462,7 @@ function screenGame() {
   h += '<div class="row"><button data-act="gHelp" style="min-height:44px;padding:0 18px;border:none;border-radius:999px;background:rgba(255,250,240,.18);color:#fffaf0;box-shadow:inset 0 0 0 1.5px rgba(255,250,240,.5);font-weight:700;cursor:pointer">' + (G.level === 4 ? 'مساعدة: أول حرف' : 'ساعدني') + '</button>' +
     (G.level === 4 ? '<button data-act="gCheck4" style="min-height:48px;padding:0 32px;border:none;border-radius:999px;background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink);font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer">اتأكد</button>' : '') + '</div></div>';
   if (G.result4 !== null) {
-    var hits4 = lcsHits(T, norm(G.typed).split(' ').filter(Boolean));
+    var hits4 = lcsHits(T, tokens(G.typed));
     h += '<div class="sheet-wrap" style="background:rgba(43,29,20,.35)"><div role="status" style="background:var(--cinnabar);color:#fffaf0;border-radius:24px 24px 0 0;padding:24px 20px calc(28px + var(--safe-bottom));display:flex;flex-direction:column;gap:12px">' +
       '<b style="font-family:var(--display);font-size:24px">لسه شوية. جبت ' + ar(G.result4) + '٪</b><p style="margin:0;font-family:var(--scripture);font-size:18px;line-height:32px">' + W.map(function (w, i) { return hits4.indexOf(i) !== -1 ? w : '<u style="text-decoration-thickness:2px;text-underline-offset:6px;color:var(--gold-soft);font-weight:700">' + w + '</u>'; }).join(' ') + '</p>' +
       '<p style="margin:0;font-size:13px;opacity:.85">الكلمات اللي تحتها خط هي اللي فاتتك. محتاج ٩٠٪ عشان تعدّي.</p><button data-act="gRetry" style="min-height:48px;border:none;border-radius:999px;background:var(--gold-soft);color:var(--ink);font-family:var(--display);font-size:16px;font-weight:700;cursor:pointer">جرّب تاني</button></div></div>';
@@ -489,7 +494,8 @@ function accept3(val) {
   return true;
 }
 var rec = null;
-function stopMic() { if (rec) { try { rec.stop(); } catch (e) {} } G && (G.listening = false); }
+function stopMic() { if (rec) { try { rec.stop(); } catch (e) {} } if (typeof G !== 'undefined' && G) G.listening = false; }
+var MIC_KEYBOARD = 'الكتابة بالصوت مش شغالة هنا. دوس في المربع واستخدم زرار الميكروفون اللي في الكيبورد.';
 
 // ---------- صورة الستوري ----------
 function shareStory() {
@@ -573,19 +579,38 @@ document.addEventListener('click', function (e) {
     case 'gMic': {
       if (G.listening) { stopMic(); render(); break; }
       var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) { G.micMsg = 'المتصفح ده مش بيدعم الكتابة بالصوت. جرّب كروم، أو استخدم ميكروفون الكيبورد.'; render(); break; }
+      // جوه Claude الصفحة مش بتاخد إذن ميكروفون، فبنحوّل على ميكروفون الكيبورد على طول
+      if (!SR || window.top !== window) { G.micOff = true; G.micMsg = MIC_KEYBOARD; render(); break; }
       try {
-        rec = new SR(); rec.lang = 'ar-EG'; rec.interimResults = true; rec.continuous = true;
-        var before = G.typed ? G.typed + ' ' : '';
-        rec.onresult = function (ev) { var t = ''; for (var k = 0; k < ev.results.length; k++) t += ev.results[k][0].transcript; G.typed = before + t; var ta = document.getElementById('g-typed'); if (ta) ta.value = G.typed; refreshLetters(); };
-        rec.onerror = function () { G.listening = false; G.micMsg = 'مقدرتش أسمعك. جرّب تاني، أو اكتبها بإيدك.'; render(); };
-        rec.onend = function () { G.listening = false; render(); };
-        rec.start(); G.listening = true; G.micMsg = ''; render();
-      } catch (err) { G.micMsg = 'الميكروفون مش متاح. اكتبها بإيدك.'; render(); }
+        var me = new SR(); rec = me; me.lang = 'ar-EG'; me.interimResults = true; me.continuous = true;
+        var before = G.typed.trim() ? G.typed.trim() + ' ' : '';
+        me.onresult = function (ev) {
+          if (rec !== me) return;
+          // كل نتيجة جملة لوحدها، فبنحط مسافة بينهم. أندرويد ساعات بيرجّع الكلام كله من الأول في كل نتيجة، فبناخد الأحدث بدل ما نكرره.
+          var parts = [];
+          for (var k = 0; k < ev.results.length; k++) {
+            var t = ev.results[k][0].transcript.trim(); if (!t) continue;
+            var last = parts[parts.length - 1];
+            if (last && t.indexOf(last) === 0) parts[parts.length - 1] = t; else parts.push(t);
+          }
+          G.typed = before + parts.join(' ');
+          var ta = document.getElementById('g-typed'); if (ta) ta.value = G.typed; refreshLetters();
+        };
+        me.onerror = function (ev) {
+          if (rec !== me) return;
+          var c = ev && ev.error;
+          if (c === 'not-allowed' || c === 'service-not-allowed' || c === 'audio-capture') { G.micOff = true; G.micMsg = MIC_KEYBOARD; }
+          else if (c === 'no-speech' || c === 'aborted') G.micMsg = 'مسمعتش حاجة. دوس «قولها بصوتك» وابدأ اتكلم على طول.';
+          else if (c === 'network') G.micMsg = 'الكتابة بالصوت محتاجة نت. جرّب تاني، أو اكتبها بإيدك.';
+          else G.micMsg = 'مقدرتش أسمعك. جرّب تاني، أو اكتبها بإيدك.';
+        };
+        me.onend = function () { if (rec !== me) return; rec = null; G.listening = false; render(); };
+        me.start(); G.listening = true; G.micMsg = ''; render();
+      } catch (err) { G.micOff = true; G.micMsg = MIC_KEYBOARD; render(); }
       break;
     }
     case 'gCheck4': {
-      var T = V.words.map(norm), typed = norm(G.typed).split(' ').filter(Boolean);
+      var T = V.words.map(norm), typed = tokens(G.typed);
       if (!typed.length) { G.tip = 'اكتب الآية الأول، أو دوس على الميكروفون وقولها.'; G.bad = true; render(); break; }
       stopMic();
       var pct = Math.round(100 * lcsHits(T, typed).length / T.length);
@@ -610,7 +635,7 @@ document.addEventListener('click', function (e) {
 });
 function refreshLetters() {
   var V = verseNow(), box = document.getElementById('g-letters'); if (!V || !box) return;
-  box.innerHTML = lettersHtml(V.words, lcsHits(V.words.map(norm), norm(G.typed).split(' ').filter(Boolean)));
+  box.innerHTML = lettersHtml(V.words, lcsHits(V.words.map(norm), tokens(G.typed)));
 }
 document.addEventListener('input', function (e) {
   var k = e.target.getAttribute('data-in');
