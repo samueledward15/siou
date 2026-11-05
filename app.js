@@ -11,9 +11,26 @@ var DIG = '٠١٢٣٤٥٦٧٨٩';
 function ar(n) { return String(n).replace(/[0-9]/g, function (d) { return DIG[d]; }); }
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function norm(s) {
-  return String(s || '').replace(/[ً-ٰٟـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه')
+  s = String(s || ''); if (s.normalize) s = s.normalize('NFKC');   // بيلم الهمزة المفكوكة وحروف «لا» المدموجة
+  return s.replace(/[\u200B-\u200F\u061C\uFEFF]/g, '')           // علامات اتجاه مخفية
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, '')                    // التشكيل والهمزة الفوقية والتطويل
+    .replace(/[أإآٱ]/g, 'ا').replace(/ؤ/g, 'و').replace(/ئ/g, 'ي').replace(/ء/g, '')
+    .replace(/[ىی]/g, 'ي').replace(/ک/g, 'ك').replace(/[ةۃ]/g, 'ه')
     .replace(/[،,.؛;:!؟?«»"()]/g, ' ').replace(/\s+/g, ' ').trim();
 }
+// كلمتين «زي بعض»: نفس الحروف، أو غلطة واحدة في كلمة طويلة (٥ حروف أو أكتر): حرف زيادة أو ناقص أو غلط، أو حرفين جنب بعض متبدلين
+function lev1(a, b) {
+  if (Math.abs(a.length - b.length) > 1) return false;
+  if (a.length === b.length) { var d = []; for (var k = 0; k < a.length; k++) if (a[k] !== b[k]) d.push(k); if (d.length === 2 && d[1] === d[0] + 1 && a[d[0]] === b[d[1]] && a[d[1]] === b[d[0]]) return true; }   // حرفين جنب بعض متبدلين
+  var i = 0, j = 0, miss = 0;
+  while (i < a.length && j < b.length) {
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++miss > 1) return false;
+    if (a.length > b.length) i++; else if (b.length > a.length) j++; else { i++; j++; }
+  }
+  return miss + (a.length - i) + (b.length - j) <= 1;
+}
+function same(a, b) { return a === b || (Math.max(a.length, b.length) >= 5 && lev1(a, b)); }
 var STAR_D = 'M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z';
 function star(size, fill, stroke) { return '<svg width="' + size + '" height="' + size + '" viewBox="-1.2 -1.2 2.4 2.4" aria-hidden="true"><path d="' + STAR_D + '" fill="' + (fill || 'var(--gold)') + '"' + (stroke ? ' stroke="' + stroke + '" stroke-width="0.08" stroke-linejoin="round"' : '') + '></path></svg>'; }
 function lamp(size) { return '<svg viewBox="0 0 120 120" width="' + size + '" height="' + size + '" aria-hidden="true">' + PARTS.lamp + '</svg>'; }
@@ -388,9 +405,9 @@ function tokens(s) {
 function lcsHits(a, b) {
   var m = a.length, n = b.length, dp = [], x, y;
   for (x = 0; x <= m; x++) dp.push(new Array(n + 1).fill(0));
-  for (x = m - 1; x >= 0; x--) for (y = n - 1; y >= 0; y--) dp[x][y] = a[x] === b[y] ? dp[x + 1][y + 1] + 1 : Math.max(dp[x + 1][y], dp[x][y + 1]);
+  for (x = m - 1; x >= 0; x--) for (y = n - 1; y >= 0; y--) dp[x][y] = same(a[x], b[y]) ? dp[x + 1][y + 1] + 1 : Math.max(dp[x + 1][y], dp[x][y + 1]);
   var hit = [], i = 0, j = 0;
-  while (i < m && j < n) { if (a[i] === b[j]) { hit.push(i); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
+  while (i < m && j < n) { if (same(a[i], b[j])) { hit.push(i); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++; }
   return hit;
 }
 function screenGame() {
@@ -444,7 +461,7 @@ function screenGame() {
   }
   // اللعب
   var total = G.right + G.wrong, score = total ? Math.round(100 * G.right / total) : 0;
-  var h = '<div class="screen" style="background:' + L.soft + '">' +
+  var h = '<div class="screen" style="background:' + L.soft + ';min-height:var(--vvh,100vh)">' +
     '<div class="row" style="padding:24px 20px 0"><button data-act="gLevels" aria-label="رجوع للمراحل" style="width:40px;height:40px;border-radius:999px;border:none;background:rgba(43,29,20,.08);font-size:20px;cursor:pointer">×</button>' +
     '<div style="display:flex;flex-direction:column;align-items:flex-end"><span class="muted" style="font-size:12px">النتيجة</span><b style="font-family:var(--display);font-size:22px;color:' + L.color + '">' + ar(score) + '٪</b></div></div>' +
     '<div class="row" style="padding:8px 20px 0;align-items:baseline"><h1 style="margin:0;font-family:var(--display);font-size:24px">' + V.ref + '</h1><b class="muted" style="font-size:13px">' + L.label + ' · ' + L.title + '</b></div>';
@@ -507,9 +524,9 @@ function finishLevel(sc) {
   if (G.level >= 2 && !isFuture()) store.stars[day().key] = true;   // النجمة بتنوّر بعد المرحلة ٢، ومش بتنوّر في يوم لسه ماجاش
   save(); G.screen = 'complete'; G.tip = ''; render();
 }
-function accept3(val) {
-  var V = verseNow(), T = V.words.map(norm);
-  if (norm(val) !== T[G.pos]) return false;
+function accept3(val, loose) {
+  var V = verseNow(), T = V.words.map(norm), v = norm(val);
+  if (!(v === T[G.pos] || (loose && same(v, T[G.pos])))) return false;
   G.pos++; G.right++; G.helped = -1; G.tip = 'اكتب الكلمة الجاية.'; G.bad = false;
   if (G.pos >= T.length) finishLevel(Math.round(100 * G.right / (G.right + G.wrong)));
   else { render(); var i = document.getElementById('g-word'); if (i) i.focus(); }
@@ -555,6 +572,7 @@ function render() {
   var fn = map[route] || screenHome;
   if (route === 'game' && !verseNow()) fn = screenHome;
   app.innerHTML = fn();
+  app.style.minHeight = route === 'game' ? '0' : '';
   document.documentElement.style.background = route === 'sky' ? '#121726' : '';
 }
 document.addEventListener('click', function (e) {
@@ -590,7 +608,7 @@ document.addEventListener('click', function (e) {
     }
     case 'gSubmit3': {
       var inp = document.getElementById('g-word'), val = inp ? inp.value : '';
-      if (!norm(val) || accept3(val)) break;
+      if (!norm(val) || accept3(val, true)) break;
       G.wrong++; G.tip = 'مش هي. الكلمة دي بتبدأ بحرف «' + norm(V.words[G.pos]).charAt(0) + '».'; G.bad = true; render();
       var i2 = document.getElementById('g-word'); if (i2) { i2.value = val; i2.focus(); }
       break;
@@ -673,5 +691,13 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter' && e.target.getAttribute && e.target.getAttribute('data-in') === 'word3') { e.preventDefault(); var b = document.querySelector('[data-act="gSubmit3"]'); if (b) b.click(); }
   if (e.key === 'Escape' && (ui.info || ui.picker)) { ui.info = false; ui.picker = false; render(); }
 });
+// لما الكيبورد يفتح، الجزء الظاهر من الشاشة بيصغر. بنخلي شاشة اللعبة بطوله ونرجع لفوق.
+function fitViewport() {
+  var vv = window.visualViewport; if (!vv) return;
+  document.documentElement.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+  if (route === 'game') window.scrollTo(0, 0);
+}
+if (window.visualViewport) window.visualViewport.addEventListener('resize', fitViewport);
+fitViewport();
 render();
 })();
