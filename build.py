@@ -3,7 +3,8 @@ import json, shutil
 src = open('app-src/app.src.js', encoding='utf8').read()
 parts = open('app-src/parts.json', encoding='utf8').read().strip()
 v = json.load(open('engine/data/verses-03-hator.json', encoding='utf8')); v['year'] = 1743
-out = src.replace('/*PARTS*/null', parts).replace('/*VERSES*/null', json.dumps(v, ensure_ascii=False))
+syn = json.load(open('engine/data/synaxarium-03-hator.json', encoding='utf8')); ps = json.load(open('engine/data/psalms-feelings.json', encoding='utf8'))
+out = src.replace('/*PARTS*/null', parts).replace('/*VERSES*/null', json.dumps(v, ensure_ascii=False)).replace('/*SYNAX*/null', json.dumps(syn, ensure_ascii=False)).replace('/*PSALMS*/null', json.dumps(ps, ensure_ascii=False))
 open('app/app.js', 'w', encoding='utf8').write(out)
 W = [
  ("""  if (!store.installHidden) h += '<div class="note" style="display:flex;flex-direction:column;gap:8px"><b style="font-family:var(--display)">ثبّت سيو على موبايلك</b><span>من قايمة المتصفح اختار «إضافة إلى الشاشة الرئيسية»، وهيبقى ليه أيقونة زي أي تطبيق.</span>""",

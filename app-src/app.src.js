@@ -91,6 +91,11 @@ Object.keys(VERSES.days).forEach(function (d) {
   };
 });
 // يوم ٦ هاتور: اليوم الكامل الأول (فاتحة الإنجيل، والخطوات، والسنكسار)
+// السنكسار: عناوين تذكارات كل يوم من فهرس موقع الأنبا تكلا
+var SYNAX = /*SYNAX*/null;
+Object.keys(SYNAX.days).forEach(function (d) { var c = CONTENT['1743-' + SYNAX.month + '-' + d]; if (c) c.synaxarium = SYNAX.days[d]; });
+// مزامير «حاسس بإيه» (فاندايك بالتشكيل)
+var PSALMS = /*PSALMS*/null;
 var C6 = CONTENT['1743-3-6'];
 C6.gospel = 'لو ٨: ٤–١٥';
 C6.opening = 'قفوا بخوف أمام الله، وانصتوا لسماع الإنجيل المقدس. فصل شريف من بشارة معلمنا لوقا الإنجيلي. بركته تكون مع جميعنا، آمين.';
@@ -141,13 +146,21 @@ function header(title, sub, opts) {
     (opts.end || '') + '</header>';
 }
 function nav(cur) {
-  var items = [['home', 'النهارده', icon('siraj-lamp', 22)], ['agpeya', 'الأجبية', icon('prayer-book', 22)], ['sky', 'السما', star(22, 'none', 'currentColor').replace('fill="none"', 'fill="none" stroke-width="0.12"')]];
-  return '<nav class="nav" aria-label="التنقل">' + items.map(function (it) {
+  var items = [['home', 'النهارده', icon('siraj-lamp', 22)], ['verses', 'آياتي', icon('quill', 22)], ['feeling', 'حاسس بإيه', icon('candle', 22)], ['sky', 'السما', star(22, 'none', 'currentColor').replace('fill="none"', 'fill="none" stroke-width="0.12"')]];
+  return '<nav class="nav" aria-label="التنقل" style="grid-template-columns:repeat(4,1fr)">' + items.map(function (it) {
     return '<button data-act="nav" data-to="' + it[0] + '"' + (cur === it[0] ? ' aria-current="page"' : '') + '><span class="ic">' + it[2] + '</span>' + it[1] + '</button>';
   }).join('') + '</nav>';
 }
 function monthStars(r) {
   var n = 0; for (var d = 1; d <= 30; d++) if (store.stars[r.coptic.year + '-' + r.coptic.month + '-' + d]) n++; return n;
+}
+// «وأنا؟»: سؤال التأمل في محراب بقوس وهالة دهبي، عشان يبقى أوضح حاجة بعد التأمل
+function andMe(q) {
+  return '<section aria-label="وأنا؟" style="position:relative;margin-top:8px;padding:30px 22px 24px;border-radius:140px 140px 18px 18px;background:var(--cinnabar);color:var(--on-lapis);text-align:center;box-shadow:0 0 0 2px var(--ink),0 0 0 5px var(--cinnabar),0 0 0 7px var(--gold);display:flex;flex-direction:column;align-items:center;gap:10px">' +
+    '<span style="width:48px;height:48px;border-radius:999px;background:var(--gold-soft);box-shadow:inset 0 0 0 2px var(--gold),0 0 0 1.5px var(--ink);display:flex;align-items:center;justify-content:center;color:var(--ink)">' + icon('candle', 26) + '</span>' +
+    '<h2 style="margin:0;color:var(--gold-soft);font-size:28px;line-height:38px">وأنا؟</h2>' +
+    '<p style="margin:0;font-size:18px;line-height:30px;font-weight:600">' + q + '</p>' +
+    '<span style="font-size:13px;opacity:.85">خد دقيقة وفكّر فيها، أو اكتبها في نوتة.</span></section>';
 }
 function chev(dir) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir > 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>'; }
 // على الرئيسية الشريط ظاهر دايمًا، وفي باقي الشاشات بيظهر بس لو فيه يوم متختار
@@ -195,6 +208,80 @@ function seasonCard(r) {
 }
 
 // ---------- الشاشة الرئيسية ----------
+// كارت «احفظ آية النهارده»: أهم حاجة في الرئيسية
+function levelPips(key, onDark) {
+  var out = '';
+  for (var i = 1; i <= 4; i++) {
+    var done = store.scores[key + ':' + i] !== undefined;
+    out += '<span title="المرحلة ' + ar(i) + '" style="width:26px;height:30px;border-radius:999px 999px 4px 4px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;' +
+      (done ? 'background:var(--gold);color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)' : onDark ? 'box-shadow:inset 0 0 0 1.5px rgba(255,250,240,.45);color:rgba(255,250,240,.7)' : 'box-shadow:inset 0 0 0 1.5px var(--rule);color:var(--ink-muted)') + '">' + ar(i) + '</span>';
+  }
+  return '<span style="display:inline-flex;gap:4px" aria-label="المراحل اللي خلصتها">' + out + '</span>';
+}
+function memorizeCard(r, C) {
+  var lit = !!store.stars[r.key], u = unlocked(), all4 = store.scores[r.key + ':4'] !== undefined;
+  var cta = all4 ? '<button class="btn" data-act="nav" data-to="verses" style="background:var(--gold);color:var(--ink)">' + star(20, 'var(--on-lapis)', 'var(--ink)') + 'حفظتها كاملة. شوف آياتك</button>'
+    : '<button class="btn" data-act="game" style="background:var(--gold);color:var(--ink);font-size:18px;min-height:56px">' + star(22, 'var(--on-lapis)', 'var(--ink)') +
+      (isFuture() ? 'اتمرّن على الآية' : lit ? 'كمّل التحدي: المرحلة ' + ar(u) : store.scores[r.key + ':1'] !== undefined ? 'كمّل: المرحلة ' + ar(u) : 'يلا نحفظها') + '</button>';
+  return '<section aria-labelledby="mem-t" style="background:var(--lapis);color:var(--on-lapis);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 0 2px var(--ink),0 0 0 4px var(--gold)">' +
+    '<div class="row"><h2 id="mem-t" style="color:var(--gold-soft)">احفظ آية النهارده</h2>' + levelPips(r.key, true) + '</div>' +
+    '<p class="verse" style="color:var(--on-lapis)">' + C.verse.words.join(' ') + '</p>' +
+    '<div class="row" style="flex-wrap:wrap;gap:8px"><span class="ref" style="color:var(--ink)">' + C.verse.ref + ' · فاندايك</span>' + (C.from ? '<span style="font-size:13px;opacity:.8">من ' + C.from + '</span>' : '') + '</div>' +
+    cta + (lit && !all4 ? '<p style="margin:-4px 0 0;font-size:13px;opacity:.85;text-align:center">' + star(14) + ' نجمة النهارده نوّرت.</p>' : '') +
+    '<button data-act="nav" data-to="readings" style="align-self:center;background:none;border:none;color:var(--gold-soft);font-weight:600;font-size:14px;min-height:44px;cursor:pointer;padding:0">' + (C.reflection ? 'اقرا التأمل و«وأنا؟» ←' : 'كل قراءات اليوم ←') + '</button></section>';
+}
+// كارت «حاسس بإيه؟»: الحاجة التانية المميزة
+function feelingCard() {
+  return '<button data-act="nav" data-to="feeling" style="border:none;cursor:pointer;text-align:start;background:var(--page-raised);color:var(--ink);border-radius:22px;padding:14px 16px 14px 14px;display:flex;align-items:center;gap:14px;box-shadow:inset 0 0 0 2px var(--ink)">' +
+    '<span style="flex-shrink:0;width:72px;height:84px;border-radius:999px 999px 12px 12px;overflow:hidden;background:' + MOODS[5].bg + ';box-shadow:0 0 0 2px var(--gold)"><svg viewBox="0 0 390 440" preserveAspectRatio="xMidYMax slice" width="72" height="84" aria-hidden="true">' + PARTS.flames[5] + '</svg></span>' +
+    '<span style="display:flex;flex-direction:column;gap:4px;flex:1"><b style="font-family:var(--display);font-size:20px;line-height:28px;color:var(--lapis)">حاسس بإيه النهارده؟</b><span class="muted" style="font-size:14px;line-height:22px">حرّك الشعلة لحد ما تبقى شبهك، ونقرالك مزمور يناسبك.</span></span>' +
+    '<span aria-hidden="true" style="font-size:22px;color:var(--lapis)">←</span></button>';
+}
+// كل الآيات اللي حفظها (نجمتها نوّرت)، الأحدث الأول
+function memorized() {
+  return Object.keys(store.stars).filter(function (k) { return store.stars[k] && CONTENT[k]; }).map(function (k) {
+    var p = k.split('-').map(Number); return { key: k, y: p[0], m: p[1], d: p[2], jdn: E.copticToJdn(p[0], p[1], p[2]) };
+  }).sort(function (a, b) { return b.jdn - a.jdn; });
+}
+function screenVerses() {
+  var list = memorized(), mastered = list.filter(function (v) { return store.scores[v.key + ':4'] !== undefined; }).length;
+  var r = day(), withVerse = 0; for (var d = 1; d <= 30; d++) if (CONTENT[r.coptic.year + '-' + r.coptic.month + '-' + d]) withVerse++;
+  var mN = monthStars(r), pct = withVerse ? Math.round(100 * mN / withVerse) : 0;
+  var h = '<div class="screen">' + header('آياتي', 'الآيات اللي حفظتها') + '<main>' +
+    '<section class="card" style="display:flex;flex-direction:column;gap:14px">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center">' +
+    '<div><b style="display:block;font-family:var(--display);font-size:40px;line-height:50px;color:var(--lapis)">' + ar(list.length) + '</b><span class="muted" style="font-size:14px">آية حفظتها</span></div>' +
+    '<div><b style="display:block;font-family:var(--display);font-size:40px;line-height:50px;color:var(--cinnabar)">' + ar(mastered) + '</b><span class="muted" style="font-size:14px">خلصت مراحلها الأربعة</span></div></div>' +
+    '<div><div class="row" style="font-size:13px"><span>' + r.coptic.monthName + '</span><span class="muted">' + ar(mN) + ' من ' + ar(withVerse) + '</span></div>' +
+    '<div style="height:12px;border-radius:999px;background:var(--papyrus);overflow:hidden;margin-top:6px"><div style="height:100%;width:' + pct + '%;background:var(--gold);border-radius:999px"></div></div></div></section>';
+  if (!list.length) {
+    var C = CONTENT[r.key];
+    h += '<div class="card-soft" style="display:flex;flex-direction:column;gap:12px;text-align:center;align-items:center"><span class="halo" style="width:64px;height:64px;border-radius:999px;background:var(--gold-soft);box-shadow:inset 0 0 0 2px var(--gold),0 0 0 1px var(--ink);display:flex;align-items:center;justify-content:center">' + icon('quill', 30) + '</span>' +
+      '<h2>لسه مافيش آيات هنا</h2><p style="margin:0;line-height:26px">كل آية بتخلص المرحلة التانية بتاعتها بتتحفظ هنا، ونجمتها بتنوّر في سماك.</p>' +
+      (C ? '<button class="btn" data-act="game" style="align-self:stretch">احفظ آية النهارده</button>' : '') + '</div>';
+  } else {
+    h += '<h2>آياتك</h2>' + list.map(function (v) {
+      var C = CONTENT[v.key];
+      return '<article class="card-soft" style="display:flex;flex-direction:column;gap:10px">' +
+        '<div class="row"><span class="muted" style="font-size:13px">' + ar(v.d) + ' ' + E.COPTIC_MONTHS[v.m - 1] + '</span>' + levelPips(v.key, false) + '</div>' +
+        '<p class="verse" style="font-size:19px;line-height:34px">' + C.verse.words.join(' ') + '</p>' +
+        '<div class="row"><span class="ref">' + C.verse.ref + '</span><button class="pill" data-act="review" data-k="' + v.key + '">راجعها</button></div></article>';
+    }).join('');
+  }
+  return h + '</main>' + nav('verses') + '</div>';
+}
+// قراية المزمور كامل
+function screenPsalm() {
+  var id = feel.ps || MOODS[feel.mood].p, P = PSALMS.psalms[id];
+  var h = '<div class="screen">' + header('مز ' + ar(id), P.title + (P.agpeya !== ar(id) ? ' · رقمه ' + P.agpeya + ' في الأجبية' : '')) + '<main style="gap:16px">' +
+    '<p class="muted" style="margin:0;font-size:14px;line-height:22px">' + MOODS[feel.mood].label + '؟ اقرا المزمور ده على مهلك، وخلّيه صلاتك.</p>' +
+    '<article class="card" style="display:flex;flex-direction:column;gap:6px">' + P.verses.map(function (v, i) {
+      return '<p style="margin:0;font-family:var(--scripture);font-size:21px;line-height:40px"><sup style="font-family:var(--display);font-size:12px;color:var(--gold);margin-inline-end:4px">' + ar(i + 1) + '</sup>' + v + '</p>';
+    }).join('') + '<span class="ref" style="align-self:flex-start;margin-top:8px">مز ' + ar(id) + ' · فاندايك</span></article>' +
+    '<button class="btn" data-act="nav" data-to="feeling">ارجع لـ«حاسس بإيه»</button>' +
+    '<p class="note" style="margin:0">لو محتاج تتكلم، كلّم أب اعترافك أو خادمك.</p></main>' + nav('feeling') + '</div>';
+  return h;
+}
 function screenHome() {
   var r = day(), C = CONTENT[r.key], lit = !!store.stars[r.key];
   var hdr = '<header class="hdr" style="justify-content:space-between"><span class="pat"></span>' +
@@ -206,19 +293,14 @@ function screenHome() {
   if (r.status === 'missing') {
     h += '<div class="card-soft" style="display:flex;flex-direction:column;gap:12px"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2>' +
       '<p style="margin:0;font-size:15px;line-height:26px">القطمارس اللي اتراجع لحد دلوقتي هو شهر هاتور، وبيبدأ الاتنين ١٠ نوفمبر. لحد ما ييجي، جرّب يوم كامل من هاتور.</p>' +
-      '<button class="btn" data-act="demo">روح لأول يوم في هاتور</button></div>';
+      '<button class="btn" data-act="demo">روح لأول يوم في هاتور</button></div>' + feelingCard();
   } else if (C) {
-    var w = C.verse.words.join(' ');
-    h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>آية اليوم</h2><article class="card" style="display:flex;flex-direction:column;gap:12px">' +
-      '<p class="verse">' + w + '</p><span class="ref" style="align-self:flex-start">' + C.verse.ref + ' · فاندايك</span>' +
-      (C.from ? '<p class="muted" style="margin:0;font-size:13px;line-height:20px">من ' + C.from + ' النهارده</p>' : '') +
-      (C.question ? '<div style="height:1px;background:var(--rule)"></div><p style="margin:0;font-size:15px;line-height:26px"><b style="font-family:var(--display)">وأنا؟ </b>' + C.question + '</p>' : '') +
-      '<button data-act="nav" data-to="readings" style="align-self:flex-start;background:none;border:none;color:var(--lapis);font-weight:600;font-size:14px;min-height:44px;cursor:pointer;padding:0">' + (C.reflection ? 'اقرا التأمل والقراءات ←' : 'كل قراءات اليوم ←') + '</button></article></section>';
+    h += memorizeCard(r, C) + feelingCard();
   } else {
     h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>قراءات النهارده</h2><div class="card-soft" style="display:flex;flex-direction:column;gap:10px">' +
       '<p style="margin:0">إنجيل القداس: <b>' + r.display.LG.join('، ') + '</b></p>' +
       '<p class="muted" style="margin:0;font-size:14px;line-height:22px">آية اليوم والتأمل لسه بيتكتبوا للأيام دي. القراءات نفسها جاهزة.</p>' +
-      '<button class="btn" data-act="nav" data-to="readings">كل قراءات اليوم</button></div></section>';
+      '<button class="btn" data-act="nav" data-to="readings">كل قراءات اليوم</button></div></section>' + feelingCard();
   }
   // النجمة والأسبوع
   var dots = '';
@@ -230,12 +312,10 @@ function screenHome() {
   }
   h += '<section class="card-soft" style="display:flex;flex-direction:column;gap:16px"><div class="row"><h2>نجمتك</h2><span class="muted" style="font-size:13px"><b style="font-family:var(--display);font-size:18px;color:var(--ink)">' + ar(monthStars(r)) + '</b> نجوم في ' + r.coptic.monthName + '</span></div>' +
     '<div class="week">' + dots + '</div>' +
-    (C ? (lit ? '<button class="btn" data-act="nav" data-to="sky" style="background:var(--gold-soft);color:var(--ink);box-shadow:0 0 0 2px var(--ink)">' + star(20, 'var(--gold)', 'var(--ink)') + 'نجمة النهارده منوّرة. شوف سماك</button>'
-      : '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + (isFuture() ? 'اتمرّن على آية اليوم ده' : picked ? 'احفظ الآية ونوّر نجمة اليوم ده' : 'احفظ الآية ونوّر نجمة النهارده') + '</button>')
-      : '<p class="muted" style="margin:0;font-size:14px">النجمة بتنوّر لما تحفظ آية اليوم. الأيام اللي فيها آية هتظهر هنا.</p>') + '</section>';
+    '<button class="btn" data-act="nav" data-to="verses" style="background:var(--gold-soft);color:var(--ink);box-shadow:inset 0 0 0 2px var(--gold)">' + icon('quill', 20) + 'آياتي المحفوظة<span style="min-width:30px;height:30px;padding:0 8px;border-radius:999px;background:var(--lapis);color:var(--on-lapis);display:inline-flex;align-items:center;justify-content:center;font-size:16px">' + ar(memorized().length) + '</span></button></section>';
   // المكتبة
   var tiles = [['readings', 'القطمارس', icon('calendar', 28)], ['agpeya', 'الأجبية', icon('prayer-book', 28)], ['saint', 'السنكسار', icon('saint', 28)],
-    ['bible', 'الكتاب المقدس', icon('chi-rho', 28)], ['feeling', 'حاسس بإيه؟', icon('candle', 28)], ['sky', 'السما', star(28, 'var(--gold)', 'var(--ink)')]];
+    ['bible', 'الكتاب المقدس', icon('chi-rho', 28)], ['verses', 'آياتي', icon('quill', 28)], ['sky', 'السما', star(28, 'var(--gold)', 'var(--ink)')]];
   h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>المكتبة</h2><div class="tiles">' + tiles.map(function (t) {
     return '<button class="tile" data-act="' + (t[0] === 'bible' ? 'soon' : 'nav') + '" data-to="' + t[0] + '"><span class="arch"' + (t[0] === 'sky' ? ' style="background:var(--lapis);box-shadow:inset 0 0 0 1.5px var(--ink)"' : '') + '><span class="halo">' + t[2] + '</span></span>' + t[1] + '</button>';
   }).join('') + '</div></section>';
@@ -256,7 +336,7 @@ function screenReadings() {
       '<section style="display:flex;flex-direction:column;gap:12px"><h2>التأمل</h2><p style="margin:0;line-height:28px">' + C.reflection + '</p>' +
       (C.steps ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">' + C.steps.map(function (s, i) {
         return '<div style="background:var(--page-raised);border-radius:999px 999px 12px 12px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:20px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:36px;height:36px;border-radius:999px;background:var(--ochre-soft);box-shadow:inset 0 0 0 2px var(--ochre);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700">' + ar(i + 1) + '</span><b>' + s + '</b></div>';
-      }).join('') + '</div>' : '') + '<p class="note" style="margin:0;background:var(--ochre-soft)"><b style="font-family:var(--display)">وأنا؟ </b>' + C.question + '</p></section>';
+      }).join('') + '</div>' : '') + '</section>' + andMe(C.question);
   } else if (C) {
     h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>آية اليوم</h2>' +
       '<article class="card" style="display:flex;flex-direction:column;gap:12px"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref" style="align-self:flex-start">' + C.verse.ref + ' · فاندايك</span>' +
@@ -280,7 +360,8 @@ function screenSaint() {
   var pic = o.img ? '<div style="position:relative;align-self:center"><img src="img/' + o.img + '.jpg" alt="' + esc(IMAGES[o.img].title) + '" style="display:block;width:240px;height:300px;object-fit:cover;object-position:' + IMAGES[o.img].focus + ';border-radius:999px 999px 12px 12px;box-shadow:0 0 0 2px var(--ink),0 0 0 6px var(--page),0 0 0 8px var(--gold)"><button class="info-chip" data-act="info" style="left:50%;bottom:-14px;transform:translateX(-50%)">عن الصورة</button></div>' : '';
   var h = '<div class="screen">' + header('السنكسار', cLabel(r)) + '<main>' + demoBar(r) + pic + '<h1 style="margin:8px 0 0;font-family:var(--display);font-size:24px;color:var(--lapis);text-align:center">تذكارات النهارده</h1>';
   if (C && C.synaxarium) h += C.synaxarium.map(function (s, i) { return '<article class="' + (i ? 'card-soft' : 'card') + '" style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:13px">' + ar(i + 1) + '</span><b style="font-family:var(--display);font-size:18px;line-height:28px">' + s + '</b></article>'; }).join('') +
-    '<p class="muted" style="margin:0;font-size:12px;text-align:center">العناوين من سنكسار موقع الأنبا تكلا. الملخصات جاية بعد المراجعة.</p>';
+    (r.coptic.month === 3 ? '<a class="btn" href="https://st-takla.org/Full-Free-Coptic-Books/Synaxarium-or-Synaxarion/03-Hatoor/' + pad(r.coptic.day) + '-Hatoor.html" target="_blank" rel="noopener" style="background:var(--gold-soft);color:var(--ink)">اقرا السير كاملة على موقع الأنبا تكلا</a>' : '') +
+    '<p class="muted" style="margin:0;font-size:12px;text-align:center">العناوين من سنكسار موقع الأنبا تكلا.</p>';
   else h += '<div class="card-soft"><p style="margin:0">سنكسار اليوم ده لسه بيتجهز.' + (o.line ? ' النهارده: <b>' + o.line + '</b>.' : '') + '</p></div>';
   return h + '</main>' + nav('') + infoSheet(r) + '</div>';
 }
@@ -348,11 +429,11 @@ function screenSky() {
 
 // ---------- حاسس بإيه ----------
 var MOODS = [
-  { label: 'متضايق', ref: 'مز ٣٧', bg: '#a5321c', fg: '#fffaf0' }, { label: 'قلقان', ref: 'مز ٢٣', bg: '#e3dcf1', fg: '#2b1d14' },
-  { label: 'زعلان', ref: 'مز ٤٢', bg: '#2f56a6', fg: '#fffaf0' }, { label: 'تعبان', ref: 'مز ٦٢', bg: '#121726', fg: '#f4ead8' },
-  { label: 'عادي', ref: 'مز ١', bg: '#ead9b9', fg: '#2b1d14' }, { label: 'في سلام', ref: 'مز ٤', bg: '#6c8a35', fg: '#fffaf0' },
-  { label: 'فرحان', ref: 'مز ١٠٠', bg: '#d4952a', fg: '#2b1d14' }];
-var feel = { mood: 5, chosen: false };
+  { label: 'متضايق', ref: 'مز ٣٧', p: '37', bg: '#a5321c', fg: '#fffaf0' }, { label: 'قلقان', ref: 'مز ٢٣', p: '23', bg: '#e3dcf1', fg: '#2b1d14' },
+  { label: 'زعلان', ref: 'مز ٤٢', p: '42', bg: '#2f56a6', fg: '#fffaf0' }, { label: 'تعبان', ref: 'مز ٦٢', p: '62', bg: '#121726', fg: '#f4ead8' },
+  { label: 'عادي', ref: 'مز ١', p: '1', bg: '#ead9b9', fg: '#2b1d14' }, { label: 'في سلام', ref: 'مز ٤', p: '4', bg: '#6c8a35', fg: '#fffaf0' },
+  { label: 'فرحان', ref: 'مز ١٠٠', p: '100', bg: '#d4952a', fg: '#2b1d14' }];
+var feel = { mood: 5, chosen: false, ps: null };
 function screenFeeling() {
   var m = MOODS[feel.mood];
   return '<div class="screen"><section id="mood-hero" style="position:relative;height:min(440px,52vh);overflow:hidden;border-radius:0 0 28px 28px;background:' + m.bg + ';transition:background 200ms">' +
@@ -364,14 +445,15 @@ function screenFeeling() {
     '<div><input class="mood" type="range" min="0" max="6" step="1" value="' + feel.mood + '" data-in="mood" aria-label="مستوى إحساسك" aria-valuetext="' + m.label + '"><div class="row muted" style="font-size:12px"><span>متضايق</span><span>فرحان</span></div></div>' +
     '<button class="btn" data-act="chooseMood" style="align-self:center;border-radius:999px;padding:0 40px">يلا</button>' +
     '<div id="mood-result">' + moodResult() + '</div>' +
-    '<p class="muted" style="margin:auto 0 0;font-size:13px">اختيارك مش بيتحفظ في أي حتة.</p><p class="note" style="margin:0">لو محتاج تتكلم، كلّم أب اعترافك أو خادمك.</p></main>' + nav('') + '</div>';
+    '<p class="muted" style="margin:auto 0 0;font-size:13px">اختيارك مش بيتحفظ في أي حتة.</p><p class="note" style="margin:0">لو محتاج تتكلم، كلّم أب اعترافك أو خادمك.</p></main>' + nav('feeling') + '</div>';
 }
 function moodResult() {
   if (!feel.chosen) return '';
   var m = MOODS[feel.mood];
   return '<section role="status" class="card" style="text-align:start;display:flex;flex-direction:column;gap:8px"><span class="muted" style="font-size:13px">' + m.label + '؟ اقرا معانا</span>' +
-    '<div class="row"><b style="font-family:var(--display);font-size:24px;color:var(--lapis)">' + m.ref + '</b><span class="muted" style="font-size:12px">[قيد المراجعة]</span></div>' +
-    '<button class="btn" data-act="soon">افتح المزمور</button></section>';
+    '<b style="font-family:var(--display);font-size:24px;color:var(--lapis)">' + m.ref + '</b>' +
+    '<p style="margin:0;font-family:var(--scripture);font-size:19px;line-height:34px">' + PSALMS.psalms[m.p].verses[0] + ' …</p>' +
+    '<button class="btn" data-act="openPsalm" data-p="' + m.p + '">اقرا المزمور كامل</button></section>';
 }
 function updateMood(v) {
   feel.mood = v; feel.chosen = false; var m = MOODS[v];
@@ -567,7 +649,7 @@ function shareStory() {
 
 // ---------- الرسم والأحداث ----------
 function render() {
-  var map = { home: screenHome, readings: screenReadings, saint: screenSaint, agpeya: screenAgpeya, sky: screenSky, feeling: screenFeeling, game: screenGame };
+  var map = { home: screenHome, readings: screenReadings, saint: screenSaint, agpeya: screenAgpeya, sky: screenSky, feeling: screenFeeling, game: screenGame, verses: screenVerses, psalm: screenPsalm };
   var fn = map[route] || screenHome;
   if (route === 'game' && !verseNow()) fn = screenHome;
   app.innerHTML = fn();
@@ -591,6 +673,8 @@ document.addEventListener('click', function (e) {
     case 'info': ui.info = true; render(); break;
     case 'closeInfo': ui.info = false; render(); break;
     case 'game': startGame(); break;
+    case 'openPsalm': feel.ps = el.getAttribute('data-p'); go('psalm'); break;
+    case 'review': { var kp = el.getAttribute('data-k').split('-').map(Number), gd = E.jdnToGregorian(E.copticToJdn(kp[0], kp[1], kp[2])); setPicked([gd.year, gd.month, gd.day]); startGame(); break; }
     case 'chooseMood': feel.chosen = true; document.getElementById('mood-result').innerHTML = moodResult(); break;
     case 'gOpen': G.level = +el.getAttribute('data-n'); G.screen = 'intro'; G.showPractice = true; render(); break;
     case 'gLevels': stopMic(); G.screen = 'levels'; render(); break;
