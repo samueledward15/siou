@@ -226,7 +226,7 @@ function memorizeCard(r, C) {
   return '<section aria-labelledby="mem-t" style="background:var(--lapis);color:var(--on-lapis);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 0 2px var(--ink),0 0 0 4px var(--gold)">' +
     '<div class="row"><h2 id="mem-t" style="color:var(--gold-soft)">احفظ آية النهارده</h2>' + levelPips(r.key, true) + '</div>' +
     '<p class="verse" style="color:var(--on-lapis)">' + C.verse.words.join(' ') + '</p>' +
-    '<div class="row" style="flex-wrap:wrap;gap:8px"><span class="ref" style="color:var(--ink)">' + C.verse.ref + ' · فاندايك</span>' + (C.from ? '<span style="font-size:13px;opacity:.8">من ' + C.from + '</span>' : '') + '</div>' +
+    '<div class="row" style="flex-wrap:wrap;gap:8px"><span class="ref" style="color:var(--ink)">' + C.verse.ref + '</span>' + (C.from ? '<span style="font-size:13px;opacity:.8">من ' + C.from + '</span>' : '') + '</div>' +
     cta + (lit && !all4 ? '<p style="margin:-4px 0 0;font-size:13px;opacity:.85;text-align:center">' + star(14) + ' نجمة النهارده نوّرت.</p>' : '') +
     '<button data-act="nav" data-to="readings" style="align-self:center;background:none;border:none;color:var(--gold-soft);font-weight:600;font-size:14px;min-height:44px;cursor:pointer;padding:0">' + (C.reflection ? 'اقرا التأمل و«وأنا؟» ←' : 'كل قراءات اليوم ←') + '</button></section>';
 }
@@ -277,7 +277,7 @@ function screenPsalm() {
     '<p class="muted" style="margin:0;font-size:14px;line-height:22px">' + MOODS[feel.mood].label + '؟ اقرا المزمور ده على مهلك، وخلّيه صلاتك.</p>' +
     '<article class="card" style="display:flex;flex-direction:column;gap:6px">' + P.verses.map(function (v, i) {
       return '<p style="margin:0;font-family:var(--scripture);font-size:21px;line-height:40px"><sup style="font-family:var(--display);font-size:12px;color:var(--gold);margin-inline-end:4px">' + ar(i + 1) + '</sup>' + v + '</p>';
-    }).join('') + '<span class="ref" style="align-self:flex-start;margin-top:8px">مز ' + ar(id) + ' · فاندايك</span></article>' +
+    }).join('') + '<span class="ref" style="align-self:flex-start;margin-top:8px">مز ' + ar(id) + '</span></article>' +
     '<button class="btn" data-act="nav" data-to="feeling">ارجع لـ«حاسس بإيه»</button>' +
     '<p class="note" style="margin:0">لو محتاج تتكلم، كلّم أب اعترافك أو خادمك.</p></main>' + nav('feeling') + '</div>';
   return h;
@@ -332,14 +332,14 @@ function screenReadings() {
   if (C && C.reflection) {
     h += '<section style="text-align:center;display:flex;flex-direction:column;gap:4px"><h1 style="margin:0;font-family:var(--display);font-size:32px;line-height:46px;color:var(--lapis)">' + C.theme + '</h1>' + (C.gospel ? '<p class="muted" style="margin:0;font-size:14px">إنجيل القداس · ' + C.gospel + '</p>' : C.from ? '<p class="muted" style="margin:0;font-size:14px">من ' + C.from + '</p>' : '') + '</section>' +
       '<section style="display:flex;flex-direction:column;gap:12px">' + (C.opening ? '<p class="muted" style="margin:0;font-size:14px;line-height:24px;text-align:center">' + C.opening + '</p>' : '') +
-      '<article class="card"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref">' + C.verse.ref + ' · فاندايك</span></article></section>' +
+      '<article class="card"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref">' + C.verse.ref + '</span></article></section>' +
       '<section style="display:flex;flex-direction:column;gap:12px"><h2>التأمل</h2><p style="margin:0;line-height:28px">' + C.reflection + '</p>' +
       (C.steps ? '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">' + C.steps.map(function (s, i) {
         return '<div style="background:var(--page-raised);border-radius:999px 999px 12px 12px;box-shadow:inset 0 0 0 1.5px var(--rule);padding:20px 4px 14px;display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:36px;height:36px;border-radius:999px;background:var(--ochre-soft);box-shadow:inset 0 0 0 2px var(--ochre);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700">' + ar(i + 1) + '</span><b>' + s + '</b></div>';
       }).join('') + '</div>' : '') + '</section>' + andMe(C.question);
   } else if (C) {
     h += '<section style="display:flex;flex-direction:column;gap:12px"><h2>آية اليوم</h2>' +
-      '<article class="card" style="display:flex;flex-direction:column;gap:12px"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref" style="align-self:flex-start">' + C.verse.ref + ' · فاندايك</span>' +
+      '<article class="card" style="display:flex;flex-direction:column;gap:12px"><p class="verse">' + C.verse.words.join(' ') + '</p><span class="ref" style="align-self:flex-start">' + C.verse.ref + '</span>' +
       (C.from ? '<p class="muted" style="margin:0;font-size:13px;line-height:20px">من ' + C.from + ' النهارده</p>' : '') + '</article>' +
       '<p class="muted" style="margin:0;font-size:13px;line-height:20px">تأمل اليوم ده لسه عند المراجعة، وهيظهر هنا أول ما يتراجع.</p></section>';
   }
@@ -349,7 +349,6 @@ function screenReadings() {
       return '<div><b style="font-weight:600">' + s[1] + '</b><span class="muted" style="font-size:14px;text-align:left">' + r.display[s[0]].join('<br>') + '</span></div>';
     }).join('') + '</div></section>';
   }).join('');
-  h += '<p class="muted" style="margin:0;font-size:12px;text-align:center">الشواهد من قطمارس موقع الأنبا تكلا، بعد مراجعة خادم. المزامير بترقيم فاندايك، ورقم القطمارس المطبوع جنبها.</p>';
   if (C) h += '<button class="btn" data-act="game">' + star(20, 'var(--gold)', 'var(--on-lapis)') + 'يلا نحفظ الآية</button>';
   return h + '</main>' + nav('') + '</div>';
 }
@@ -360,8 +359,7 @@ function screenSaint() {
   var pic = o.img ? '<div style="position:relative;align-self:center"><img src="img/' + o.img + '.jpg" alt="' + esc(IMAGES[o.img].title) + '" style="display:block;width:240px;height:300px;object-fit:cover;object-position:' + IMAGES[o.img].focus + ';border-radius:999px 999px 12px 12px;box-shadow:0 0 0 2px var(--ink),0 0 0 6px var(--page),0 0 0 8px var(--gold)"><button class="info-chip" data-act="info" style="left:50%;bottom:-14px;transform:translateX(-50%)">عن الصورة</button></div>' : '';
   var h = '<div class="screen">' + header('السنكسار', cLabel(r)) + '<main>' + demoBar(r) + pic + '<h1 style="margin:8px 0 0;font-family:var(--display);font-size:24px;color:var(--lapis);text-align:center">تذكارات النهارده</h1>';
   if (C && C.synaxarium) h += C.synaxarium.map(function (s, i) { return '<article class="' + (i ? 'card-soft' : 'card') + '" style="display:flex;flex-direction:column;gap:6px"><span class="muted" style="font-size:13px">' + ar(i + 1) + '</span><b style="font-family:var(--display);font-size:18px;line-height:28px">' + s + '</b></article>'; }).join('') +
-    (r.coptic.month === 3 ? '<a class="btn" href="https://st-takla.org/Full-Free-Coptic-Books/Synaxarium-or-Synaxarion/03-Hatoor/' + pad(r.coptic.day) + '-Hatoor.html" target="_blank" rel="noopener" style="background:var(--gold-soft);color:var(--ink)">اقرا السير كاملة على موقع الأنبا تكلا</a>' : '') +
-    '<p class="muted" style="margin:0;font-size:12px;text-align:center">العناوين من سنكسار موقع الأنبا تكلا.</p>';
+    (r.coptic.month === 3 ? '<a class="btn" href="https://st-takla.org/Full-Free-Coptic-Books/Synaxarium-or-Synaxarion/03-Hatoor/' + pad(r.coptic.day) + '-Hatoor.html" target="_blank" rel="noopener" style="background:var(--gold-soft);color:var(--ink)">اقرا السير كاملة</a>' : '') ;
   else h += '<div class="card-soft"><p style="margin:0">سنكسار اليوم ده لسه بيتجهز.' + (o.line ? ' النهارده: <b>' + o.line + '</b>.' : '') + '</p></div>';
   return h + '</main>' + nav('') + infoSheet(r) + '</div>';
 }
@@ -378,7 +376,7 @@ function screenAgpeya() {
     '<button class="btn" data-act="soon" style="margin-top:8px;background:var(--gold-soft);color:var(--ink);border-radius:999px">ابدأ الصلاة</button></section>' +
     '<section style="display:flex;flex-direction:column;gap:8px"><h2>السواعي</h2><div class="list">' + HOURS.map(function (x, i) {
       return '<div style="' + (i === cur ? 'background:var(--gold-soft)' : '') + '"><span style="display:flex;flex-direction:column"><b>' + x[0] + '</b><span class="muted" style="font-size:13px">' + x[1] + '</span></span><span class="muted" style="font-size:13px;white-space:nowrap">' + (i === cur ? '<b style="color:var(--lapis)">دلوقتي</b>' : x[2]) + '</span></div>';
-    }).join('') + '</div><p class="muted" style="margin:0;font-size:12px">نص الصلوات من أجبية موقع الأنبا تكلا، هيتضاف بعد المراجعة.</p></section></main>' + nav('agpeya') + '</div>';
+    }).join('') + '</div></section></main>' + nav('agpeya') + '</div>';
   return h;
 }
 
