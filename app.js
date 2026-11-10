@@ -164,6 +164,12 @@ function andMe(q) {
 }
 function chev(dir) { return '<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="' + (dir > 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7') + '" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>'; }
 // على الرئيسية الشريط ظاهر دايمًا، وفي باقي الشاشات بيظهر بس لو فيه يوم متختار
+// متصفحات التطبيقات (إنستجرام وفيسبوك وتيك توك وسناب) بتمسح التخزين أو بتفصله عن Safari وChrome
+var IN_APP = /Instagram|FBAN|FBAV|FB_IAB|TikTok|musical_ly|BytedanceWebview|Snapchat|Line\//i.test(navigator.userAgent || '');
+function inAppNote() {
+  if (!IN_APP) return '';
+  return '<div class="note" role="status" style="display:flex;flex-direction:column;gap:6px;background:var(--cinnabar-soft)"><b style="font-family:var(--display)">افتح سيو في Safari أو Chrome</b><span>انت فاتحه من جوه تطبيق تاني، ونجومك وآياتك المحفوظة ممكن ماتتحفظش هنا. دوس على «…» فوق واختار «افتح في المتصفح»، وبعدين ثبّته على الشاشة الرئيسية.</span></div>';
+}
 function demoBar(r, always) {
   if (!picked && !always) return '';
   var arrow = 'width:44px;height:44px;padding:0;justify-content:center;flex-shrink:0';
@@ -289,7 +295,7 @@ function screenHome() {
     '<span dir="ltr" style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">' + wordmark(104, 30) +
     '<span style="font-family:Marcellus,Georgia,serif;font-size:11.5px;line-height:14px;letter-spacing:.18em;opacity:.85">SIOU · <span style="font-family:var(--body);letter-spacing:0">نجمة</span></span></span></button>' +
     '<button data-act="nav" data-to="sky" aria-label="' + ar(monthStars(r)) + ' نجوم في ' + r.coptic.monthName + '" style="position:relative;background:none;border:none;color:var(--on-lapis);min-height:44px;display:inline-flex;align-items:center;gap:6px;font-family:var(--display);font-size:18px;font-weight:700;cursor:pointer">' + star(18) + ar(monthStars(r)) + '</button></header>';
-  var h = '<div class="screen">' + hdr + '<main>' + seasonCard(r) + demoBar(r, true);
+  var h = '<div class="screen">' + hdr + '<main>' + inAppNote() + seasonCard(r) + demoBar(r, true);
   if (r.status === 'missing') {
     h += '<div class="card-soft" style="display:flex;flex-direction:column;gap:12px"><h2>قراءات ' + r.coptic.monthName + ' لسه بتتجهز</h2>' +
       '<p style="margin:0;font-size:15px;line-height:26px">القطمارس اللي اتراجع لحد دلوقتي هو شهر هاتور، وبيبدأ الاتنين ١٠ نوفمبر. لحد ما ييجي، جرّب يوم كامل من هاتور.</p>' +
@@ -600,7 +606,7 @@ function lettersHtml(W, hits) {
   return W.map(function (w, i) { var ok = hits.indexOf(i) !== -1; return '<span style="min-width:30px;text-align:center;padding:0 6px;border-radius:6px;' + (ok ? 'background:var(--olive-soft);color:var(--olive)' : 'background:var(--gold-soft)') + '">' + norm(w).charAt(0) + 'ـ</span>'; }).join('');
 }
 function finishLevel(sc) {
-  store.scores[scoreKey(G.level)] = sc;
+  if (!isFuture()) store.scores[scoreKey(G.level)] = sc;   // تمرين على يوم لسه ماجاش مش بيتسجل
   if (G.level >= 2 && !isFuture()) store.stars[day().key] = true;   // النجمة بتنوّر بعد المرحلة ٢، ومش بتنوّر في يوم لسه ماجاش
   save(); G.screen = 'complete'; G.tip = ''; render();
 }
@@ -647,7 +653,20 @@ function shareStory() {
 }
 
 // ---------- الرسم والأحداث ----------
+// تصليح ذاتي: أي يوم جه أو فات واتسجلت فيه المرحلة ٢ أو أكتر، نجمته لازم تكون منوّرة.
+// (قبل الإطلاق التمرين على ١ هاتور كان بيسجّل المراحل من غير نجمة.)
+function healStars() {
+  var changed = false, t = todayDate(), tj = dayNum(t);
+  Object.keys(store.scores).forEach(function (k) {
+    var m = /^(\d+)-(\d+)-(\d+):(\d)$/.exec(k); if (!m || +m[4] < 2) return;
+    var dk = m[1] + '-' + m[2] + '-' + m[3]; if (store.stars[dk]) return;
+    var g = E.jdnToGregorian(E.copticToJdn(+m[1], +m[2], +m[3]));
+    if (dayNum([g.year, g.month, g.day]) <= tj) { store.stars[dk] = true; changed = true; }
+  });
+  if (changed) save();
+}
 function render() {
+  healStars();
   var map = { home: screenHome, readings: screenReadings, saint: screenSaint, agpeya: screenAgpeya, sky: screenSky, feeling: screenFeeling, game: screenGame, verses: screenVerses, psalm: screenPsalm };
   var fn = map[route] || screenHome;
   if (route === 'game' && !verseNow()) fn = screenHome;
