@@ -25,7 +25,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&family=Marcellus&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&family=Marcellus&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&family=Marcellus&display=swap"></noscript>
 <style>
 :root{
   color-scheme:light;padding-top:env(safe-area-inset-top,0px);
@@ -97,6 +100,28 @@ input.mood::-moz-range-thumb{width:44px;height:44px;border:none;border-radius:99
 @keyframes rise{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
 .rise{animation:rise 240ms ease-out both}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ---------- الانترو: يد من قوس السما بتحط أول نجمة ---------- */
+#intro{position:fixed;inset:0;z-index:100;background:#121726;overflow:hidden;transition:opacity .24s ease-out}
+#intro.out{opacity:0;pointer-events:none}
+#intro>*,.i-drop>*{position:absolute}
+#intro svg{display:block}
+.i-sky{inset:0;width:100%;height:100%;animation:i-fade .4s ease-out both}
+.i-arc{left:50%;top:0;width:300px;height:96px;margin-left:-150px;animation:i-fade .2s ease-out both}
+.i-arm{left:50%;bottom:calc(58% + 8px);width:84px;height:100%;margin-left:-42px;display:flex;flex-direction:column;align-items:center;transform:translateY(-60%);animation:i-arm 1.15s .25s both}
+.i-arm i{flex:1;width:48px;background:#a5321c;box-shadow:inset 0 0 0 2.4px #2b1d14}
+.i-drop{inset:0;animation:i-drop .55s cubic-bezier(.2,.7,.2,1) .25s both}
+.i-halo{left:50%;top:42%;width:144px;height:144px;margin:-72px 0 0 -72px;animation:i-rise .24s ease-out .8s both}
+.i-star{left:50%;top:42%;width:64px;height:64px;margin:-32px 0 0 -32px}
+.i-word{left:50%;top:calc(42% + 92px);width:132px;height:38px;margin-left:-66px;color:#f4ead8;animation:i-rise .24s ease-out 1.05s both}
+.i-lamp{left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));width:40px;height:40px;margin-left:-20px;border-radius:999px;box-shadow:0 0 0 2px #d4952a;animation:i-fade .3s ease-out 1.15s both}
+#intro.q .i-arm{display:none}
+#intro.q .i-drop{animation:none}
+#intro.q .i-halo,#intro.q .i-word,#intro.q .i-lamp{animation-delay:0s}
+@keyframes i-fade{from{opacity:0}to{opacity:1}}
+@keyframes i-rise{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes i-drop{from{transform:translateY(-60%)}to{transform:none}}
+@keyframes i-arm{0%{transform:translateY(-60%);animation-timing-function:cubic-bezier(.2,.7,.2,1)}48%{transform:none}62%{transform:none;animation-timing-function:cubic-bezier(.5,0,.8,.4)}100%{transform:translateY(-60%)}}
+@media (prefers-reduced-motion:reduce){.i-arm{display:none}}
 .dark{background:var(--vigil);color:var(--vigil-ink)}
 .nav.nav-dark{background:var(--vigil-raised);border-top-color:var(--vigil-rule)}
 .nav.nav-dark button{color:var(--vigil-muted)}
@@ -105,10 +130,30 @@ input.mood::-moz-range-thumb{width:44px;height:44px;border:none;border-radius:99
 </style>
 </head>
 <body>
+<div id="intro" aria-hidden="true">
+<svg class="i-sky" viewBox="0 0 360 640" preserveAspectRatio="xMidYMid slice"><g fill="#f4ead8"><circle cx="210" cy="119" r="1" opacity="0.7"/><circle cx="56" cy="444" r="1" opacity="0.7"/><circle cx="117" cy="108" r="1" opacity="0.5"/><circle cx="222" cy="141" r="1.2" opacity="0.35"/><circle cx="290" cy="504" r="1" opacity="0.7"/><circle cx="71" cy="298" r="1" opacity="0.7"/><circle cx="307" cy="476" r="1" opacity="0.35"/><circle cx="31" cy="206" r="1.6" opacity="0.5"/><circle cx="81" cy="190" r="1.6" opacity="0.7"/><circle cx="305" cy="262" r="1.6" opacity="0.35"/><circle cx="288" cy="134" r="1" opacity="0.7"/><circle cx="113" cy="578" r="2" opacity="0.5"/><circle cx="246" cy="534" r="1.6" opacity="0.5"/><circle cx="132" cy="153" r="1.6" opacity="0.7"/><circle cx="261" cy="421" r="2" opacity="0.5"/><circle cx="319" cy="144" r="1" opacity="0.7"/><circle cx="258" cy="501" r="1" opacity="0.7"/><circle cx="47" cy="391" r="1.6" opacity="0.7"/><circle cx="187" cy="578" r="2" opacity="0.35"/><circle cx="55" cy="346" r="2" opacity="0.7"/><circle cx="348" cy="136" r="1" opacity="0.7"/><circle cx="166" cy="526" r="1.6" opacity="0.7"/><circle cx="205" cy="425" r="1" opacity="0.5"/><circle cx="320" cy="189" r="2" opacity="0.35"/><circle cx="74" cy="323" r="2" opacity="0.5"/><circle cx="262" cy="152" r="1.2" opacity="0.5"/></g><g fill="none" stroke="#b9ad9c" stroke-width=".14" stroke-linejoin="round" opacity=".7"><path transform="translate(58 150) scale(6)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(306 236) scale(5)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(74 452) scale(5)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(292 508) scale(6)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/></g></svg>
+<div class="i-drop"><svg class="i-halo" viewBox="-72 -72 144 144"><circle r="50" fill="#3b2f16" stroke="#d4952a" stroke-width="2"/><g stroke="#f4ead8" stroke-width="1.7" stroke-linecap="round"><path d="M60.0 0.0 L68.0 0.0"/><path d="M55.4 23.0 L62.8 26.0"/><path d="M42.4 42.4 L48.1 48.1"/><path d="M23.0 55.4 L26.0 62.8"/><path d="M0.0 60.0 L0.0 68.0"/><path d="M-23.0 55.4 L-26.0 62.8"/><path d="M-42.4 42.4 L-48.1 48.1"/><path d="M-55.4 23.0 L-62.8 26.0"/><path d="M-60.0 0.0 L-68.0 0.0"/><path d="M-55.4 -23.0 L-62.8 -26.0"/><path d="M-42.4 -42.4 L-48.1 -48.1"/><path d="M-23.0 -55.4 L-26.0 -62.8"/><path d="M-0.0 -60.0 L-0.0 -68.0"/><path d="M23.0 -55.4 L26.0 -62.8"/><path d="M42.4 -42.4 L48.1 -48.1"/><path d="M55.4 -23.0 L62.8 -26.0"/></g></svg>
+<svg class="i-star" viewBox="-1.2 -1.2 2.4 2.4"><path d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z" fill="#d4952a" stroke="#2b1d14" stroke-width=".08" stroke-linejoin="round"/></svg></div>
+<div class="i-arm"><i></i><svg width="84" height="112" viewBox="-30 -9 60 80"><defs><g id="i-h"><rect x="-14" y="0" width="28" height="34" rx="6"/><rect x="-14" y="22" width="7" height="34" rx="3.5"/><rect x="-7" y="22" width="7" height="42" rx="3.5"/><rect x="0" y="22" width="7" height="40" rx="3.5"/><rect x="7" y="22" width="7" height="31" rx="3.5"/><rect x="11" y="6" width="7.5" height="26" rx="3.75" transform="rotate(-30 14 8)"/></g></defs><use href="#i-h" fill="#e0a77f" stroke="#2b1d14" stroke-width="4.8" stroke-linejoin="round"/><use href="#i-h" fill="#e0a77f"/><path d="M-7 30V52M0 30V56M7 30V50" stroke="#2b1d14" stroke-width="1.4" stroke-linecap="round"/><rect x="-19" y="-8" width="38" height="10" fill="#d4952a" stroke="#2b1d14" stroke-width="2.4"/></svg></div>
+<svg class="i-arc" viewBox="0 0 300 96"><circle cx="150" cy="-70" r="160" fill="#1f3a75" stroke="#d4952a" stroke-width="3"/><circle cx="150" cy="-70" r="146" fill="none" stroke="#f6e2b5" stroke-width="1.2" opacity=".7"/><g fill="#d4952a"><path transform="translate(96 44) scale(5)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(204 44) scale(5)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(60 14) scale(4)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/><path transform="translate(240 14) scale(4)" d="M0 -1 L0.29 -0.4 L0.95 -0.31 L0.47 0.15 L0.59 0.81 L0 0.5 L-0.59 0.81 L-0.47 0.15 L-0.95 -0.31 L-0.29 -0.4 Z"/></g></svg>
+<svg class="i-word" viewBox="42 -723 3129 902"><path d="M794 -175Q794 -112 673 -48Q583 0 466 0Q313 0 197 -73Q50 -165 50 -337Q50 -387 72 -451Q108 -556 185 -617Q290 -701 462 -701Q568 -701 681.0 -650.0Q794 -599 794 -552Q794 -525 767.5 -512.0Q741 -499 676 -499Q626 -499 598 -535Q537 -613 426 -613Q307 -613 256 -519Q217 -447 217 -320Q217 -186 302 -125Q366 -79 462 -79Q539 -79 585.5 -144.5Q632 -210 733 -210Q735 -210 740.5 -211.0Q746 -212 751 -212Q769 -212 781.5 -204.5Q794 -197 794 -175ZM1195.0 -85Q1194.0 -110 1193.0 -142.0Q1192.0 -174 1190.0 -213Q1188.0 -253 1187.0 -282.0Q1186.0 -311 1185.0 -331.0Q1184.0 -351 1183.5 -370.0Q1183.0 -389 1182.0 -408Q1182.0 -413 1183.5 -448.0Q1185.0 -483 1189.0 -547Q1190.0 -584 1195.0 -658Q1195.0 -681 1185.0 -694Q1171.0 -714 1137.0 -714Q1071.0 -714 1031.5 -698.0Q992.0 -682 992.0 -648Q995.0 -630 997.0 -616.0Q999.0 -602 1000.0 -591Q1004.0 -561 1005.5 -537.0Q1007.0 -513 1007.0 -496Q1007.0 -413 1006.0 -349.0Q1005.0 -285 1003.0 -238.0Q1001.0 -191 998.5 -153.0Q996.0 -115 992.0 -85Q992.0 -42 1016.0 -20Q1046.0 7 1116.0 7Q1195.0 7 1195.0 -85ZM2235.0 -358Q2235.0 -301 2224.0 -258Q2197.0 -152 2117.0 -85Q2006.0 8 1808.0 8Q1637.0 8 1537.0 -61Q1460.0 -114 1428.0 -205Q1407.0 -265 1407.0 -331Q1408.0 -356 1408.0 -358Q1408.0 -513 1523.5 -613.5Q1639.0 -714 1808.0 -714Q1979.0 -714 2104.0 -615Q2235.0 -511 2235.0 -358ZM2046.0 -325Q2046.0 -495 1953.0 -570Q1891.0 -620 1808.0 -620Q1709.0 -620 1645.0 -535Q1587.0 -458 1587.0 -325Q1587.0 -255 1635.0 -181Q1699.0 -82 1808.0 -82Q1939.0 -82 2002.0 -180Q2046.0 -248 2046.0 -325ZM3163.0 -681Q3163.0 -656 3087.0 -556Q3049.0 -505 3012.5 -456.5Q2976.0 -408 2939.0 -360Q2858.0 -249 2855.0 -226Q2853.0 -203 2852.0 -194V-170Q2852.0 -113 2857.0 -51.0Q2862.0 11 2868.0 80V95Q2868.0 99 2868.0 103Q2868.0 107 2869.0 111Q2869.0 142 2853.0 154Q2830.0 171 2768.0 171Q2746.0 171 2726.5 158.5Q2707.0 146 2707.0 131Q2715.0 51 2721.5 -29.0Q2728.0 -109 2728.0 -174Q2728.0 -218 2696.0 -291Q2682.0 -321 2663.0 -355.5Q2644.0 -390 2619.0 -429Q2591.0 -475 2527.0 -564Q2485.0 -608 2433.0 -618Q2382.0 -628 2382.0 -650Q2382.0 -670 2420.0 -690Q2469.0 -715 2556.0 -715Q2603.0 -715 2663.0 -609Q2669.0 -598 2692.0 -549.5Q2715.0 -501 2757.0 -413Q2807.0 -306 2830.0 -306Q2854.0 -306 2897.0 -412Q2927.0 -485 2949.5 -534.0Q2972.0 -583 2988.0 -608Q3053.0 -715 3129.0 -715Q3143.0 -715 3153.0 -705.0Q3163.0 -695 3163.0 -681Z" fill="currentColor"/></svg>
+<svg class="i-lamp" viewBox="0 0 120 120"><circle cx="60" cy="60" r="56" fill="#1f3a75" stroke="#2b1d14" stroke-width="3"/><circle cx="60" cy="38" r="25" fill="#d4952a" stroke="#2b1d14" stroke-width="2.4"/><g stroke="#fffaf0" stroke-width="1.7" stroke-linecap="round"><path d="M75.50 38.00 L82.50 38.00"/><path d="M44.50 38.00 L37.50 38.00"/><path d="M45.68 32.07 L39.21 29.39"/><path d="M49.04 27.04 L44.09 22.09"/><path d="M54.07 23.68 L51.39 17.21"/><path d="M60.00 22.50 L60.00 15.50"/><path d="M65.93 23.68 L68.61 17.21"/><path d="M70.96 27.04 L75.91 22.09"/><path d="M74.32 32.07 L80.79 29.39"/></g><path d="M47 82 L54 63 Q60 58 66 63 L73 82Z" fill="#a65a36" stroke="#2b1d14" stroke-width="2.4" stroke-linejoin="round"/><circle cx="60" cy="90" r="19" fill="#a65a36" stroke="#2b1d14" stroke-width="2.6"/><circle cx="60" cy="90" r="11.5" fill="#e0a77f" stroke="#2b1d14" stroke-width="2"/><path d="M58.0 83.4 L62.0 83.4 L62.0 88.0 L66.6 88.0 L66.6 92.0 L62.0 92.0 L62.0 96.6 L58.0 96.6 L58.0 92.0 L53.4 92.0 L53.4 88.0 L58.0 88.0Z" fill="#a65a36"/><circle cx="60.0" cy="82.5" r="1.09" fill="#a65a36"/><circle cx="62.3" cy="83.4" r="0.99" fill="#a65a36"/><circle cx="57.7" cy="83.4" r="0.99" fill="#a65a36"/><circle cx="60.0" cy="97.5" r="1.09" fill="#a65a36"/><circle cx="57.7" cy="96.6" r="0.99" fill="#a65a36"/><circle cx="62.3" cy="96.6" r="0.99" fill="#a65a36"/><circle cx="52.5" cy="90.0" r="1.09" fill="#a65a36"/><circle cx="53.4" cy="87.7" r="0.99" fill="#a65a36"/><circle cx="53.4" cy="92.3" r="0.99" fill="#a65a36"/><circle cx="67.5" cy="90.0" r="1.09" fill="#a65a36"/><circle cx="66.6" cy="92.3" r="0.99" fill="#a65a36"/><circle cx="66.6" cy="87.7" r="0.99" fill="#a65a36"/><circle cx="60" cy="66" r="2" fill="#2b1d14"/><path d="M60 62 C49 54 49 40 60 22 C71 40 71 54 60 62Z" fill="#b23a22" stroke="#2b1d14" stroke-width="2.4" stroke-linejoin="round"/><path d="M58.7 34 h2.6 v8 h6 v2.6 h-6 v12 h-2.6 v-12 h-6 v-2.6 h6Z" fill="#fffaf0"/></svg>
+</div>
+<script>
+// الانترو كامل أول فتحة في اليوم، وبعدها نسخة قصيرة. بيختفي أول ما التطبيق يترسم.
+(function(){var el=document.getElementById('intro'),t0=Date.now(),d=new Date(),k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(),full=true;
+try{full=localStorage.getItem('siou.intro')!==k;localStorage.setItem('siou.intro',k);}catch(e){}
+var still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+if(!full||still)el.className='q';
+var min=still?400:full?1500:550;
+window.siouIntroDone=function(){setTimeout(function(){el.className+=' out';setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},260);},Math.max(0,min-(Date.now()-t0)));};
+})();
+</script>
 <div id="app" dir="rtl" lang="ar"></div>
 
 <script src="engine.js"></script>
 <script src="app.js"></script>
+<script>if(window.siouIntroDone)siouIntroDone();</script>
 <script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script>
 </body>
 </html>
